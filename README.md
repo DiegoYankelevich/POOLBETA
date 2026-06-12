@@ -1,41 +1,2608 @@
-SALÓN DE POOL — SISTEMA DE GESTIÓN · VERSIÓN BETA 5 (11/06/2026 · v0.14)
-==========================================================================
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BOCETO MD3 — Sistema de Gestión · Salón de Pool</title>
+<style>
+/* ============ MATERIAL DESIGN 3 — TOKENS ============ */
+:root{
+  --primary:#1f6b46; --on-primary:#ffffff; --primary-container:#a8f2c4; --on-primary-container:#00210f;
+  --secondary:#4e6354; --secondary-container:#d0e8d6; --on-secondary-container:#0b1f13;
+  --tertiary:#8a5100; --tertiary-container:#ffddb8; --on-tertiary-container:#2c1700;
+  --error:#ba1a1a; --error-container:#ffdad6; --on-error-container:#410002;
+  --surface:#f6fbf3; --surface-dim:#d6dbd3; --surface-container-low:#f0f5ed;
+  --surface-container:#eaefe7; --surface-container-high:#e4eae1; --surface-container-highest:#dee4db;
+  --on-surface:#171d19; --on-surface-variant:#404943; --outline:#707970; --outline-variant:#c0c9bf;
+  --inverse-surface:#2c322d; --inverse-on-surface:#edf2ea;
+  --shadow:rgba(0,0,0,.15); --scrim:rgba(0,0,0,.45);
+  --ok:#1f6b46; --warn:#8a5100;
+}
+[data-theme="dark"]{
+  --primary:#8dd5a8; --on-primary:#00391e; --primary-container:#00522e; --on-primary-container:#a8f2c4;
+  --secondary:#b5ccba; --secondary-container:#374b3d; --on-secondary-container:#d0e8d6;
+  --tertiary:#ffb866; --tertiary-container:#693c00; --on-tertiary-container:#ffddb8;
+  --error:#ffb4ab; --error-container:#93000a; --on-error-container:#ffdad6;
+  --surface:#0f1511; --surface-dim:#0f1511; --surface-container-low:#171d18;
+  --surface-container:#1b211c; --surface-container-high:#252b26; --surface-container-highest:#303631;
+  --on-surface:#dfe4dd; --on-surface-variant:#c0c9bf; --outline:#8a938a; --outline-variant:#404943;
+  --inverse-surface:#dfe4dd; --inverse-on-surface:#2c322d;
+  --shadow:rgba(0,0,0,.4); --scrim:rgba(0,0,0,.6);
+  --ok:#8dd5a8; --warn:#ffb866;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Roboto,'Segoe UI',system-ui,sans-serif;background:var(--surface);color:var(--on-surface);min-height:100vh;transition:background .25s}
 
-QUÉ ES
-Demostración navegable del sistema de gestión: mesas de pool con
-cronómetro y cobro por minuto, mesas de salón, cuentas de mostrador,
-comandas estilo KDS, pre-cierre con cajero, venta de productos con
-stock, gastos, reportes con balance y configuración.
+.ribbon{background:var(--tertiary-container);color:var(--on-tertiary-container);text-align:center;font-size:12px;font-weight:600;letter-spacing:2px;padding:5px}
 
-CÓMO USARLA
-1. Copiar el archivo SalonPool-BETA.html al pendrive (es un solo archivo,
-   no necesita nada más: ni internet, ni instalación).
-2. En cualquier PC: doble clic → se abre en el navegador
-   (Chrome o Edge recomendados).
+/* ---- top app bar ---- */
+.appbar{display:flex;align-items:center;gap:14px;padding:10px 18px;background:var(--surface-container);position:sticky;top:0;z-index:30;flex-wrap:wrap}
+.appbar .logo{width:36px;height:36px;border-radius:50%;background:radial-gradient(circle at 32% 30%,#3a3a3a,#000);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.appbar .logo::after{content:"8";background:#fff;color:#000;border-radius:50%;width:16px;height:16px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.appbar h1{font-size:18px;font-weight:500;flex:1;min-width:160px}
+.appbar h1 small{display:block;font-size:11px;color:var(--on-surface-variant);font-weight:400}
 
-PARA LA DEMO
-- Selector Mozo/Caja/Admin (arriba): muestra qué ve cada rol.
-  · Mozo: Salón, Mi turno e Historial. Abre mesas (personas obligatorias),
-    comanda con comentario y envía el pre-cierre a caja. No cobra.
-  · Caja: suma Cajero (cola de pre-cierres + cuentas abiertas),
-    Comandas (KDS con edición auditada), Productos y Gastos.
-  · Admin: acceso total (Dashboard, Reportes, Config).
-- Botón 中: toda la interfaz en chino. Botón 🌗: modo claro/oscuro.
-- Mesa verde → se abre indicando personas (nombre opcional).
-- Mesa roja → cuenta: productos, "Comandar" con comentario, estados
-  por ítem (sin comandar / en preparación / entregado).
-- "Enviar a caja" → la mesa queda azul 💳 PAGANDO, el cronómetro se
-  congela y el cajero la cobra desde la pestaña Cajero (Pool 9 ya
-  viene de ejemplo esperando cobro).
-- Comandas → "✏️ Editar" (rol Caja/Admin) reemplaza productos con
-  motivo; todo queda en el Historial con filtros.
+.segmented{display:flex;border:1px solid var(--outline);border-radius:100px;overflow:hidden}
+.segmented button{background:transparent;border:none;color:var(--on-surface);padding:8px 18px;font-size:13px;font-weight:500;cursor:pointer}
+.segmented button.sel{background:var(--secondary-container);color:var(--on-secondary-container)}
+.icon-btn{background:transparent;border:none;font-size:19px;cursor:pointer;border-radius:50%;width:42px;height:42px;color:var(--on-surface)}
+.icon-btn:hover{background:var(--surface-container-high)}
 
-IMPORTANTE
-- Es un BOCETO: los datos son de ejemplo y viven en memoria.
-  Al recargar la página (F5) todo vuelve al estado inicial
-  — útil para reiniciar la demo.
-- Las pantallas de Dashboard y Reportes muestran números
-  de ejemplo fijos para ilustrar el diseño.
+/* ---- layout ---- */
+.layout{display:flex;min-height:calc(100vh - 92px)}
+nav.rail{width:96px;background:var(--surface-container);padding:14px 6px;display:flex;flex-direction:column;gap:6px;align-items:center;flex-shrink:0}
+.rail .item{width:84px;border:none;background:transparent;color:var(--on-surface-variant);cursor:pointer;border-radius:16px;padding:8px 2px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;font-family:inherit}
+.rail .item .ic{font-size:20px;border-radius:100px;padding:3px 16px;transition:.15s}
+.rail .item:hover .ic{background:var(--surface-container-highest)}
+.rail .item.sel{color:var(--on-surface)}
+.rail .item.sel .ic{background:var(--secondary-container)}
+.rail .sep{width:50px;border-top:1px solid var(--outline-variant);margin:8px 0}
+.rail .adminlabel{font-size:9px;letter-spacing:1.5px;color:var(--on-surface-variant)}
+main{flex:1;padding:22px;max-width:1180px;width:100%;margin:0 auto}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:900px){.cols2{grid-template-columns:1fr}}
+/* móvil: navegación abajo (bottom nav MD3) y diálogos como bottom sheets */
+@media(max-width:820px){
+  .layout{flex-direction:column}
+  nav.rail{position:fixed;bottom:0;left:0;right:0;z-index:40;width:100%;flex-direction:row;justify-content:space-around;overflow-x:auto;padding:4px 2px;border-top:1px solid var(--outline-variant)}
+  .rail .item{width:auto;min-width:60px;padding:6px 4px}
+  .rail .sep,.rail .adminlabel{display:none}
+  main{padding:14px 12px 96px}
+  .fab{bottom:86px;right:16px}
+}
+@media(max-width:640px){
+  .overlay{padding:0;align-items:flex-end}
+  .dialog{max-width:100% !important;border-radius:28px 28px 0 0;max-height:94vh}
+  .appbar{padding:8px 10px;gap:8px}
+  .screen-title{font-size:20px}
+}
+section.screen{display:none}
+section.screen.sel{display:block}
+.screen-title{font-size:24px;font-weight:400;margin-bottom:4px}
+.screen-sub{font-size:13px;color:var(--on-surface-variant);margin-bottom:20px}
 
-Versión de trabajo y documentación: carpeta del proyecto
-"Gestion de Mesas" (OneDrive de Diego).
+/* ---- componentes ---- */
+.card{background:var(--surface-container-low);border-radius:16px;padding:18px;overflow-x:auto}
+.card.filled{background:var(--surface-container-high)}
+.btn{border:none;border-radius:100px;padding:10px 22px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;transition:.15s}
+.btn.filled{background:var(--primary);color:var(--on-primary)}
+.btn.filled:hover{box-shadow:0 2px 8px var(--shadow)}
+.btn.tonal{background:var(--secondary-container);color:var(--on-secondary-container)}
+.btn.outlined{background:transparent;color:var(--primary);border:1px solid var(--outline)}
+.btn.text{background:transparent;color:var(--primary)}
+.btn.danger{background:var(--error-container);color:var(--on-error-container)}
+.fab{position:fixed;right:26px;bottom:26px;background:var(--primary-container);color:var(--on-primary-container);border:none;border-radius:18px;padding:16px 22px;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 4px 14px var(--shadow);z-index:20;display:none;font-family:inherit}
+.chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--outline-variant);background:transparent;color:var(--on-surface);border-radius:9px;padding:7px 14px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit}
+.chip.sel{background:var(--secondary-container);border-color:transparent;color:var(--on-secondary-container)}
+.chiprow{display:flex;gap:8px;flex-wrap:wrap}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;color:var(--on-surface-variant);margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%;background:var(--surface-container);border:1px solid var(--outline);border-radius:6px;padding:11px 13px;font-size:15px;color:var(--on-surface);font-family:inherit}
+.field input:focus,.field select:focus{outline:2px solid var(--primary);border-color:transparent}
+.badge{font-size:11px;font-weight:600;border-radius:100px;padding:3px 10px}
+.badge.ok{background:var(--primary-container);color:var(--on-primary-container)}
+.badge.warn{background:var(--tertiary-container);color:var(--on-tertiary-container)}
+.badge.err{background:var(--error-container);color:var(--on-error-container)}
+
+/* dialogs */
+.overlay{display:none;position:fixed;inset:0;background:var(--scrim);z-index:60;align-items:center;justify-content:center;padding:14px}
+.overlay.open{display:flex}
+.dialog{background:var(--surface-container-high);border-radius:28px;padding:24px;width:100%;max-width:440px;max-height:92vh;overflow:auto}
+.dialog.wide{max-width:620px}
+.dialog h2{font-size:20px;font-weight:400;margin-bottom:4px}
+.dialog .sub{font-size:13px;color:var(--on-surface-variant);margin-bottom:16px}
+.dialog .acciones{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap}
+.lista{background:var(--surface-container);border-radius:12px;padding:6px 14px;font-size:14px}
+.lista .fila{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--outline-variant);gap:8px}
+.lista .fila:last-child{border:none}
+.lista .total{font-weight:700;font-size:17px;color:var(--primary)}
+.money{font-weight:600;color:var(--primary);white-space:nowrap}
+.neg{color:var(--error)}
+
+/* buscador + quick keys (patrón POS: search arriba, más vendidos como accesos directos) */
+.search-box{position:relative;margin-bottom:10px}
+.search-box input{width:100%;background:var(--surface-container);border:1px solid var(--outline);border-radius:100px;padding:12px 18px 12px 42px;font-size:15px;color:var(--on-surface);font-family:inherit}
+.search-box input:focus{outline:2px solid var(--primary);border-color:transparent}
+.search-box::before{content:"🔍";position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:14px;opacity:.7}
+.qk-label{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--on-surface-variant);margin:2px 0 6px}
+.quick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px;margin-bottom:14px}
+.qk{background:var(--surface-container-low);border:1px solid var(--outline-variant);border-radius:12px;padding:9px 11px;cursor:pointer;text-align:left;font-family:inherit;color:var(--on-surface);transition:.12s}
+.qk:hover{background:var(--secondary-container)}
+.qk:active{transform:scale(.97)}
+.qk .n{font-size:12.5px;font-weight:500;display:block;line-height:1.25}
+.qk .p{font-size:13px;font-weight:700;color:var(--primary)}
+.qk .st{font-size:10.5px;color:var(--on-surface-variant)}
+.qk.off{opacity:.45;pointer-events:none}
+.step{width:27px;height:27px;border-radius:50%;border:1px solid var(--outline);background:transparent;color:var(--on-surface);cursor:pointer;font-size:15px;line-height:1;font-family:inherit}
+.step:hover{background:var(--surface-container-highest)}
+.qtyrow{display:flex;align-items:center;gap:7px}
+.qtyrow b{min-width:18px;text-align:center}
+
+/* snackbar */
+.snackbar{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--inverse-surface);color:var(--inverse-on-surface);padding:13px 24px;border-radius:8px;font-size:14px;display:none;z-index:99;box-shadow:0 6px 18px var(--shadow);max-width:90vw}
+
+/* ---- salón: mesas dibujadas en vista cenital ---- */
+.grid-mesas{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:1000px){.grid-mesas{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:640px){.grid-mesas{grid-template-columns:repeat(2,1fr)}}
+#grid-salon{grid-template-columns:repeat(5,1fr)}
+@media(max-width:1000px){#grid-salon{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:640px){#grid-salon{grid-template-columns:repeat(2,1fr)}}
+
+.tcard{position:relative;cursor:pointer;border-radius:18px;transition:.18s;line-height:0}
+.tcard .tsvg{width:100%;height:auto;display:block;border-radius:14px}
+.tcard.libre{--halo:#23a35d}
+.tcard.ocupada{--halo:#e53935}
+.tcard.alerta{--halo:#f0a514}
+.tcard.vinculada{--halo:#8e6bd6}
+.tcard.pagando{--halo:#3d7df0}
+.tcard .tsvg{filter:drop-shadow(0 0 0 transparent)}
+.tcard{box-shadow:0 0 0 2.5px var(--halo), 0 0 16px color-mix(in srgb, var(--halo) 55%, transparent)}
+.tcard:hover{transform:translateY(-3px) scale(1.01)}
+.tcard.alerta{animation:haloPulse 1.1s infinite}
+@keyframes haloPulse{50%{box-shadow:0 0 0 4px var(--halo), 0 0 26px var(--halo)}}
+
+.tchip{position:absolute;top:9px;right:11px;font-size:9.5px;font-weight:800;letter-spacing:.6px;background:var(--halo);color:#fff;border-radius:100px;padding:3px 9px;z-index:2;line-height:1.2}
+.tnum{position:absolute;top:9px;left:11px;font-size:10.5px;font-weight:700;color:#fff;background:rgba(0,0,0,.4);padding:3px 9px;border-radius:100px;z-index:2;line-height:1.2}
+.tinfo{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;pointer-events:none;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.8);text-align:center;padding:8px 16px;line-height:1.3}
+.tinfo .nom{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.tinfo .tmr{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums}
+.tinfo .imp{font-size:13px;font-weight:800;color:#ffe9a8}
+.tinfo .lib{font-size:11.5px;opacity:.95;font-weight:500}
+.tinfo .det{font-size:10.5px;opacity:.92}
+
+/* ---- mostrador: cuentas tipo "bar tab" ---- */
+.tab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:12px}
+.tabcard{background:var(--surface-container-low);border:1px solid var(--outline-variant);border-left:5px solid #e53935;border-radius:16px;padding:13px 14px;cursor:pointer;display:flex;gap:11px;align-items:center;transition:.15s}
+.tabcard:hover{transform:translateY(-2px);box-shadow:0 4px 12px var(--shadow)}
+.tabcard .avatar{width:38px;height:38px;border-radius:50%;background:var(--primary-container);color:var(--on-primary-container);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0}
+.tabcard .info{flex:1;min-width:0}
+.tabcard .n{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tabcard .d{font-size:11.5px;color:var(--on-surface-variant)}
+.tabcard .tot{font-weight:800;color:var(--primary);font-size:14.5px;white-space:nowrap}
+.tab-new{border:2px dashed var(--outline);background:transparent;border-radius:16px;display:flex;align-items:center;justify-content:center;gap:6px;color:var(--on-surface-variant);font-weight:600;font-size:13.5px;min-height:64px;cursor:pointer;font-family:inherit;transition:.15s}
+.tab-new:hover{background:var(--surface-container);color:var(--on-surface)}
+
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px}
+.kpi{background:var(--surface-container-low);border-radius:16px;padding:16px}
+.kpi .l{font-size:12px;color:var(--on-surface-variant)}
+.kpi .v{font-size:23px;font-weight:600;margin-top:4px}
+.kpi .d{font-size:11.5px;margin-top:3px;font-weight:600}
+.kpi .d.up{color:var(--ok)} .kpi .d.down{color:var(--error)}
+.kpi.destacado{background:var(--primary-container);color:var(--on-primary-container)}
+
+/* dashboard: gráfico de ventas por hora (barras apiladas) y split */
+.hchart{display:flex;align-items:flex-end;gap:5px;height:150px;margin-top:8px}
+.hcol{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;cursor:default;position:relative;border-radius:6px}
+.hcol:hover{background:var(--surface-container-high)}
+.hcol .seg-p{background:var(--tertiary);border-radius:4px 4px 0 0;opacity:.85}
+.hcol .seg-t{background:var(--primary);border-radius:0 0 3px 3px}
+.hcol.cur .seg-t{outline:2px solid var(--on-surface);outline-offset:1px}
+.hlabels{display:flex;gap:5px;margin-top:6px}
+.hlabels span{flex:1;text-align:center;font-size:10px;color:var(--on-surface-variant)}
+.splitbar{display:flex;height:16px;border-radius:100px;overflow:hidden;margin:10px 0 8px}
+.splitbar .st{background:var(--primary)} .splitbar .sp{background:var(--tertiary)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--on-surface-variant)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px}
+.barras .fila-barra{display:grid;grid-template-columns:110px 1fr 90px;gap:10px;align-items:center;font-size:13px;padding:6px 0}
+.barra{height:10px;border-radius:100px;background:var(--surface-container-highest);overflow:hidden}
+.barra>div{height:100%;border-radius:100px;background:var(--primary)}
+
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--on-surface-variant);padding:9px 10px;border-bottom:1px solid var(--outline-variant)}
+td{padding:10px;border-bottom:1px solid var(--outline-variant)}
+tr:last-child td{border-bottom:none}
+th.r,td.r{text-align:right}
+
+/* ---- comandas (estilo KDS: tarjetas con aging por color) ---- */
+.cmd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:12px}
+.cmd-card{background:var(--surface-container-low);border-radius:16px;padding:14px;border-top:5px solid var(--ok);display:flex;flex-direction:column;gap:8px}
+.cmd-card.warn{border-top-color:var(--warn)}
+.cmd-card.pago{border-top-color:#3d7df0}
+.cmd-card.late{border-top-color:var(--error);animation:haloPulse2 1.2s infinite}
+@keyframes haloPulse2{50%{box-shadow:0 0 14px color-mix(in srgb, var(--error) 45%, transparent)}}
+.cmd-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.cmd-mesa{font-weight:700;font-size:14px}
+.cmd-age{font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--on-surface-variant);white-space:nowrap}
+.cmd-card.warn .cmd-age{color:var(--warn)} .cmd-card.late .cmd-age{color:var(--error)}
+.cmd-items{font-size:13.5px;line-height:1.7}
+.cmd-coment{background:var(--tertiary-container);color:var(--on-tertiary-container);border-radius:8px;padding:7px 10px;font-size:12.5px}
+/* estados de ítems en la cuenta: sin comandar / en preparación / entregado */
+.istate{font-size:10px;font-weight:700;border-radius:100px;padding:2px 8px;white-space:nowrap}
+.istate.ent{background:var(--primary-container);color:var(--on-primary-container)}
+.istate.pend{background:var(--tertiary-container);color:var(--on-tertiary-container)}
+.istate.new{background:var(--surface-container-highest);color:var(--on-surface-variant);border:1px dashed var(--outline)}
+/* badge de comandas pendientes en el rail */
+.rail .item .ic{position:relative}
+.railbadge{position:absolute;top:-5px;right:6px;background:var(--error);color:#fff;font-size:10px;font-weight:800;border-radius:100px;padding:1px 6px;line-height:1.4}
+
+.ticket{font-family:'Courier New',monospace;background:#fff;color:#111;border-radius:8px;padding:18px;font-size:12.5px;line-height:1.5;max-width:300px;margin:0 auto}
+.ticket .c{text-align:center}.ticket hr{border:none;border-top:1px dashed #999;margin:8px 0}
+.ticket .tr{display:flex;justify-content:space-between;gap:10px}
+.ticket .tot{font-size:15px;font-weight:700}
+</style>
+</head>
+<body>
+
+<div class="ribbon">BOCETO MATERIAL DESIGN 3 · DATOS DE EJEMPLO · FUNCIONAL EN MEMORIA (SE PIERDE AL RECARGAR)</div>
+
+<header class="appbar">
+  <div class="logo"></div>
+  <h1>Salón de Pool — Gestión <small id="fecha"></small></h1>
+  <div class="segmented" title="Cambiar vista según rol (en producción lo determina el PIN de login)">
+    <button id="rol-mozo" onclick="setRol('mozo')">Mozo</button>
+    <button id="rol-caja" onclick="setRol('caja')">Caja</button>
+    <button id="rol-admin" class="sel" onclick="setRol('admin')">Admin</button>
+  </div>
+  <button class="icon-btn" onclick="toggleLang()" id="lang-btn" title="Idioma / 语言" style="font-size:15px;font-weight:700">中</button>
+  <button class="icon-btn" onclick="toggleTheme()" title="Claro / oscuro">🌗</button>
+</header>
+
+<div class="layout">
+<nav class="rail" id="rail">
+  <button class="item sel" data-s="mesas" onclick="go('mesas')"><span class="ic">🎱</span>Salón</button>
+  <button class="item" data-s="cajero" onclick="go('cajero')"><span class="ic">💰<span class="railbadge" id="badge-cajero" style="display:none">0</span></span>Cajero</button>
+  <button class="item" data-s="comandas" onclick="go('comandas')"><span class="ic">🧾<span class="railbadge" id="badge-comandas" style="display:none">0</span></span>Comandas</button>
+  <button class="item" data-s="hist" onclick="go('hist')"><span class="ic">📜</span>Historial</button>
+  <button class="item" data-s="turno" onclick="go('turno')"><span class="ic">⏱️</span>Mi turno</button>
+  <button class="item" data-s="prod" onclick="go('prod')"><span class="ic">📦</span>Productos</button>
+  <button class="item" data-s="gastos" onclick="go('gastos')"><span class="ic">💸</span>Gastos</button>
+  <div class="sep admin-only"></div>
+  <span class="adminlabel admin-only">ADMIN</span>
+  <button class="item" data-s="dash" onclick="go('dash')"><span class="ic">📊</span>Dashboard</button>
+  <button class="item" data-s="rep" onclick="go('rep')"><span class="ic">📈</span>Reportes</button>
+  <button class="item" data-s="conf" onclick="go('conf')"><span class="ic">⚙️</span>Config</button>
+</nav>
+
+<main>
+
+<!-- ================= SALÓN ================= -->
+<section class="screen sel" id="s-mesas">
+  <div class="screen-title">Salón</div>
+  <div class="screen-sub">Turno de <b>Lucas</b> · abierto 18:00 · Pool <span id="tarifa-lbl">$12.000</span>/h — tocá cualquier mesa para operar su cuenta</div>
+  <h3 style="font-weight:500;margin-bottom:10px">🎱 Mesas de pool</h3>
+  <div class="grid-mesas" id="grid-mesas"></div>
+  <h3 style="font-weight:500;margin:24px 0 10px">🪑 Mesas de salón <span style="font-size:12px;color:var(--on-surface-variant);font-weight:400">— solo consumos, sin cargo por tiempo</span></h3>
+  <div class="grid-mesas" id="grid-salon"></div>
+  <h3 style="font-weight:500;margin:24px 0 10px">🍻 Mostrador <span style="font-size:12px;color:var(--on-surface-variant);font-weight:400">— cuentas abiertas por nombre, se mantienen hasta cobrar</span></h3>
+  <div class="tab-grid" id="grid-mostrador"></div>
+</section>
+
+<!-- ================= CAJERO ================= -->
+<section class="screen" id="s-cajero">
+  <div class="screen-title">Cajero</div>
+  <div class="screen-sub">Pre-cierres enviados por los mozos y cuentas abiertas · acá se cobra y se emite el ticket</div>
+  <h3 style="font-weight:500;margin-bottom:10px">💳 Esperando cobro <span style="font-size:12px;color:var(--on-surface-variant);font-weight:400">— las más viejas primero, hay gente esperando pagar</span></h3>
+  <div class="cmd-grid" id="cajero-pendientes" style="margin-bottom:24px"></div>
+  <h3 style="font-weight:500;margin-bottom:10px">Cuentas abiertas <span style="font-size:12px;color:var(--on-surface-variant);font-weight:400">— tocá una para operarla o cobrarla directo</span></h3>
+  <div class="card" style="padding:6px 14px">
+    <div class="lista" id="cajero-abiertas" style="background:transparent;padding:0"></div>
+  </div>
+</section>
+
+<!-- ================= COMANDAS (KDS) ================= -->
+<section class="screen" id="s-comandas">
+  <div class="screen-title">Comandas</div>
+  <div class="screen-sub">Pedidos enviados a preparación · las más viejas primero · tocá ✓ cuando esté lista y entregada</div>
+  <div class="cmd-grid" id="cmd-grid"></div>
+</section>
+
+<!-- ================= HISTORIAL ================= -->
+<section class="screen" id="s-hist">
+  <div class="screen-title">Historial</div>
+  <div class="screen-sub">Todos los pedidos y cobros del salón en orden cronológico</div>
+  <div class="chiprow" style="margin-bottom:10px" id="hist-filtros">
+    <button class="chip sel" data-f="todo" onclick="setFiltroHist(this)">Todo</button>
+    <button class="chip" data-f="comanda" onclick="setFiltroHist(this)">🧾 Comandas</button>
+    <button class="chip" data-f="cobro" onclick="setFiltroHist(this)">💰 Cobros</button>
+    <button class="chip" data-f="cambios" onclick="setFiltroHist(this)">✏️ Cambios</button>
+  </div>
+  <div class="search-box"><input type="text" id="hist-buscar" placeholder="Buscar por mesa o cliente…" oninput="renderHistorial()" autocomplete="off"></div>
+  <div class="card" style="padding:6px 14px">
+    <div class="lista" id="hist-lista" style="background:transparent;padding:0"></div>
+  </div>
+</section>
+
+<!-- ================= MI TURNO ================= -->
+<section class="screen" id="s-turno">
+  <div class="screen-title">Mi turno</div>
+  <div class="screen-sub" id="turno-sub"></div>
+  <div id="turno-body"></div>
+</section>
+
+<!-- ================= DASHBOARD ================= -->
+<section class="screen" id="s-dash">
+  <div class="screen-title">Dashboard</div>
+  <div class="screen-sub" id="dash-sub">Hoy en vivo · día contable desde las 06:00 · comparado contra el mismo día de la semana pasada</div>
+  <div class="kpi-row" id="dash-kpis"></div>
+  <div class="card" style="margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px">
+      <h3 style="font-weight:500">Ventas por hora</h3>
+      <div class="legend"><span><i style="background:var(--primary)"></i>Tiempo de mesa</span><span><i style="background:var(--tertiary)"></i>Productos</span></div>
+    </div>
+    <div class="hchart" id="dash-horas"></div>
+    <div class="hlabels" id="dash-horas-lbl"></div>
+  </div>
+  <div class="cols2">
+    <div>
+      <div class="card" style="margin-bottom:14px">
+        <h3 style="font-weight:500">De dónde viene la plata</h3>
+        <div class="splitbar" id="dash-split"></div>
+        <div class="legend" id="dash-split-leg"></div>
+      </div>
+      <div class="card">
+        <h3 style="font-weight:500;margin-bottom:8px">Recaudación por medio</h3>
+        <div class="barras" id="dash-medios"></div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:14px">
+        <h3 style="font-weight:500;margin-bottom:8px">⚠️ Para mirar ahora</h3>
+        <div class="lista" id="dash-alertas"></div>
+      </div>
+      <div class="card">
+        <h3 style="font-weight:500;margin-bottom:8px">Más vendidos hoy</h3>
+        <div class="lista" id="dash-top"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PRODUCTOS ================= -->
+<section class="screen" id="s-prod">
+  <div class="screen-title">Productos y stock</div>
+  <div class="screen-sub">El costo se actualiza con cada compra · tocá un producto para editarlo</div>
+  <div class="kpi-row" id="prod-kpis"></div>
+  <div class="search-box"><input type="text" id="prod-buscar" placeholder="Buscar producto…" oninput="renderTablaProd()" autocomplete="off"></div>
+  <div class="chiprow" style="margin-bottom:14px" id="prod-filtros">
+    <button class="chip sel" data-f="Todos" onclick="setFiltroProd(this)">Todos</button>
+    <button class="chip" data-f="Bebidas" onclick="setFiltroProd(this)">Bebidas</button>
+    <button class="chip" data-f="Insumos" onclick="setFiltroProd(this)">Insumos</button>
+    <button class="chip" data-f="Otros" onclick="setFiltroProd(this)">Otros</button>
+    <button class="chip" data-f="Promos" onclick="setFiltroProd(this)">🎁 Promos</button>
+    <button class="chip" data-f="Bajo" onclick="setFiltroProd(this)">⚠️ Bajo mínimo</button>
+  </div>
+  <div class="card" style="padding:6px 14px">
+    <table>
+      <thead><tr><th>Producto</th><th>Categoría</th><th class="r">Precio venta</th><th class="r">Costo</th><th class="r">Margen</th><th class="r">Stock</th><th class="r">Mín.</th><th>Estado</th></tr></thead>
+      <tbody id="tabla-prod"></tbody>
+    </table>
+  </div>
+  <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">
+    <button class="btn tonal" onclick="abrirProducto(-1)">＋ Nuevo producto</button>
+    <button class="btn filled" onclick="abrirCompra()">📦 Registrar compra</button>
+  </div>
+</section>
+
+<!-- ================= GASTOS ================= -->
+<section class="screen" id="s-gastos">
+  <div class="screen-title">Gastos</div>
+  <div class="screen-sub">Impactan en la ganancia neta · tocá un gasto para editarlo</div>
+  <div class="kpi-row" id="gastos-kpis"></div>
+  <div class="chiprow" style="margin-bottom:10px" id="gastos-meses">
+    <button class="chip sel" data-m="2026-06" onclick="setMesGasto(this)">Junio 2026</button>
+    <button class="chip" data-m="2026-05" onclick="setMesGasto(this)">Mayo 2026</button>
+  </div>
+  <div class="chiprow" style="margin-bottom:14px" id="gastos-cats">
+    <button class="chip sel" data-c="Todas" onclick="setCatGasto(this)">Todas</button>
+    <button class="chip" data-c="Alquiler" onclick="setCatGasto(this)">Alquiler</button>
+    <button class="chip" data-c="Servicios" onclick="setCatGasto(this)">Servicios</button>
+    <button class="chip" data-c="Sueldos" onclick="setCatGasto(this)">Sueldos</button>
+    <button class="chip" data-c="Mantenimiento" onclick="setCatGasto(this)">Mantenimiento</button>
+    <button class="chip" data-c="Impuestos" onclick="setCatGasto(this)">Impuestos</button>
+    <button class="chip" data-c="Otros" onclick="setCatGasto(this)">Otros</button>
+    <button class="chip" data-c="Fijos" onclick="setCatGasto(this)">📌 Fijos</button>
+  </div>
+  <div class="cols2">
+    <div class="card">
+      <h3 style="font-weight:500;margin-bottom:8px">Por categoría</h3>
+      <div class="barras" id="gastos-barras"></div>
+    </div>
+    <div class="card" style="padding:6px 14px">
+      <table>
+        <thead><tr><th>Fecha</th><th>Categoría</th><th>Detalle</th><th>Medio</th><th class="r">Monto</th></tr></thead>
+        <tbody id="tabla-gastos"></tbody>
+      </table>
+    </div>
+  </div>
+  <div style="margin-top:14px;text-align:right">
+    <button class="btn filled" onclick="abrirGasto(-1)">＋ Registrar gasto</button>
+  </div>
+</section>
+
+<!-- ================= REPORTES ================= -->
+<section class="screen" id="s-rep">
+  <div class="screen-title">Reportes y balance</div>
+  <div class="screen-sub">El balance toma los gastos reales de la pantalla Gastos · todo exportable a Excel</div>
+  <div class="chiprow" style="margin-bottom:16px" id="rep-periodos">
+    <button class="chip" data-p="hoy" onclick="setPeriodoRep(this)">Hoy</button>
+    <button class="chip" data-p="semana" onclick="setPeriodoRep(this)">Últimos 7 días</button>
+    <button class="chip sel" data-p="2026-06" onclick="setPeriodoRep(this)">Junio 2026</button>
+    <button class="chip" data-p="2026-05" onclick="setPeriodoRep(this)">Mayo 2026</button>
+    <span style="flex:1"></span>
+    <button class="btn outlined" onclick="exportarRep()">⬇️ Exportar Excel</button>
+  </div>
+  <div class="cols2">
+    <div>
+      <div class="card filled" style="margin-bottom:14px">
+        <h3 style="font-weight:500;margin-bottom:10px" id="rep-balance-titulo">Balance</h3>
+        <div class="lista" id="rep-balance"></div>
+      </div>
+      <div class="card" id="rep-dias-card">
+        <h3 style="font-weight:500" id="rep-dias-titulo">Ventas por día</h3>
+        <div class="hchart" id="rep-dias" style="height:110px"></div>
+        <div class="hlabels" id="rep-dias-lbl"></div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:14px">
+        <h3 style="font-weight:500;margin-bottom:8px">Top productos del período</h3>
+        <div class="lista" id="rep-top"></div>
+      </div>
+      <div class="card" style="margin-bottom:14px">
+        <h3 style="font-weight:500;margin-bottom:8px">Turnos — diferencias de caja</h3>
+        <div class="lista" id="rep-turnos"></div>
+      </div>
+      <div class="card">
+        <h3 style="font-weight:500;margin-bottom:8px">Stock valorizado (en vivo)</h3>
+        <div class="lista" id="rep-stock"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CONFIG ================= -->
+<section class="screen" id="s-conf">
+  <div class="screen-title">Configuración</div>
+  <div class="screen-sub">Solo administrador (en producción protegida con PIN) · los cambios afectan toda la app al instante</div>
+  <div class="cols2">
+    <div class="card">
+      <h3 style="font-weight:500;margin-bottom:12px">Tarifas y cobro</h3>
+      <div class="field"><label>Valor de la hora de mesa ($)</label><input type="number" id="conf-tarifa"></div>
+      <div class="field"><label>Redondeo del total a cobrar</label>
+        <select id="conf-redondeo"><option value="100">A $100</option><option value="0">Exacto</option><option value="500">A $500</option></select>
+      </div>
+      <div class="field"><label>Corte del día contable</label><select id="conf-corte"><option selected>06:00</option><option>05:00</option><option>00:00</option></select></div>
+      <div style="text-align:right"><button class="btn filled" onclick="guardarConfGeneral()">Aplicar cambios</button></div>
+    </div>
+    <div class="card">
+      <h3 style="font-weight:500;margin-bottom:12px">Recargos por medio de pago (%)</h3>
+      <div class="lista" id="conf-recargos"></div>
+      <div style="text-align:right;margin-top:10px"><button class="btn filled" onclick="guardarRecargos()">Aplicar recargos</button></div>
+    </div>
+    <div class="card">
+      <h3 style="font-weight:500;margin-bottom:12px">Usuarios</h3>
+      <div class="lista" id="conf-usuarios"></div>
+      <div style="text-align:right;margin-top:10px"><button class="btn text" onclick="abrirUsuario()">＋ Agregar</button></div>
+    </div>
+    <div class="card">
+      <h3 style="font-weight:500;margin-bottom:12px">Datos y respaldo</h3>
+      <div class="lista">
+        <div class="fila"><span>Exportar historial completo</span><button class="btn text" onclick="exportarRep()">Excel</button></div>
+        <div class="fila"><span>Ticket</span><span style="font-size:12.5px;color:var(--on-surface-variant)">En pantalla / PDF (térmica a futuro)</span></div>
+        <div class="fila"><span>Cambiar PIN de administrador</span><button class="btn text" onclick="cambiarPIN()">Cambiar…</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+
+<button class="fab" id="fab" onclick="fabAction()">🛒 Venta rápida</button>
+
+<!-- ============ DIALOGS ============ -->
+
+<!-- abrir mesa (pool o salón) -->
+<div class="overlay" id="d-abrir" onclick="bg(event,'d-abrir')">
+  <div class="dialog">
+    <h2 id="abrir-titulo">Abrir Mesa</h2>
+    <div class="sub" id="abrir-sub"></div>
+    <div class="field" id="abrir-pers-field"><label>¿Cuántas personas? *</label>
+      <div class="chiprow" id="abrir-pers">
+        <button class="chip" data-p="1" onclick="selChip(this)">1</button>
+        <button class="chip" data-p="2" onclick="selChip(this)">2</button>
+        <button class="chip" data-p="3" onclick="selChip(this)">3</button>
+        <button class="chip" data-p="4" onclick="selChip(this)">4</button>
+        <button class="chip" data-p="5" onclick="selChip(this)">5</button>
+        <button class="chip" data-p="6" onclick="selChip(this)">6</button>
+        <button class="chip" data-p="8" onclick="selChip(this)">8</button>
+        <button class="chip" data-p="10" onclick="selChip(this)">10+</button>
+      </div>
+    </div>
+    <div class="field"><label>Nombre del cliente (opcional)</label><input type="text" id="abrir-nombre" placeholder="Ej: Carlos"></div>
+    <div class="field" id="abrir-tiempo"><label>Tiempo solicitado (alerta opcional)</label>
+      <div class="chiprow" id="abrir-chips">
+        <button class="chip sel" data-min="0" onclick="selChip(this)">Libre</button>
+        <button class="chip" data-min="30" onclick="selChip(this)">30 min</button>
+        <button class="chip" data-min="60" onclick="selChip(this)">1 h</button>
+        <button class="chip" data-min="120" onclick="selChip(this)">2 h</button>
+      </div>
+    </div>
+    <div class="acciones">
+      <button class="btn text" onclick="cerrar('d-abrir')">Cancelar</button>
+      <button class="btn filled" onclick="confirmarAbrir()">Abrir mesa</button>
+    </div>
+  </div>
+</div>
+
+<!-- CUENTA UNIFICADA (pool / salón / venta rápida) — patrón POS: buscador, más vendidos, ticket -->
+<div class="overlay" id="d-cuenta" onclick="bg(event,'d-cuenta')">
+  <div class="dialog wide">
+    <h2 id="cuenta-titulo"></h2>
+    <div class="sub" id="cuenta-sub"></div>
+    <div class="search-box"><input type="text" id="buscar" placeholder="Buscar producto…" oninput="renderResultados()" autocomplete="off"></div>
+    <div class="qk-label" id="resultados-label">★ Más vendidos</div>
+    <div class="quick-grid" id="resultados"></div>
+    <div class="qk-label">Cuenta</div>
+    <div class="lista" id="cuenta-items"></div>
+    <div class="acciones" id="cuenta-acciones"></div>
+  </div>
+</div>
+
+<!-- comandar pedido -->
+<div class="overlay" id="d-comandar" onclick="bg(event,'d-comandar')">
+  <div class="dialog">
+    <h2>Comandar pedido</h2>
+    <div class="sub" id="comandar-sub"></div>
+    <div class="qk-label">Se envía a preparación</div>
+    <div class="lista" id="comandar-items" style="margin-bottom:14px"></div>
+    <div class="field"><label>Comentario para la preparación (opcional)</label>
+      <textarea id="comandar-coment" rows="2" placeholder="Ej: la gaseosa al natural, sin hielo"></textarea>
+    </div>
+    <div class="acciones">
+      <button class="btn text" onclick="cerrar('d-comandar')">Volver</button>
+      <button class="btn filled" onclick="confirmarComandar()">🧾 Enviar comanda</button>
+    </div>
+  </div>
+</div>
+
+<!-- editar comanda (caja / admin) -->
+<div class="overlay" id="d-editcmd" onclick="bg(event,'d-editcmd')">
+  <div class="dialog">
+    <h2>Editar comanda <span id="editcmd-num"></span></h2>
+    <div class="sub" id="editcmd-sub"></div>
+    <div class="lista" id="editcmd-items" style="margin-bottom:12px"></div>
+    <div class="field"><label>Agregar / reemplazar por</label>
+      <div style="display:flex;gap:8px">
+        <select id="editcmd-prod" style="flex:1;background:var(--surface-container);border:1px solid var(--outline);border-radius:6px;padding:11px 13px;font-size:15px;color:var(--on-surface)"></select>
+        <button class="btn tonal" onclick="editCmdAgregar()">＋ Agregar</button>
+      </div>
+    </div>
+    <div class="field"><label>Motivo del cambio (obligatorio, queda en el historial)</label><input type="text" id="editcmd-motivo" placeholder="Ej: sin stock de Coca, se reemplaza por agua"></div>
+    <div class="acciones">
+      <button class="btn text" onclick="cerrar('d-editcmd')">Cancelar</button>
+      <button class="btn filled" onclick="guardarEdicionCmd()">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- pasar / mover mesa -->
+<div class="overlay" id="d-pasar" onclick="bg(event,'d-pasar')">
+  <div class="dialog">
+    <h2 id="pasar-titulo">Pasar a mesa de pool</h2>
+    <div class="sub" id="pasar-sub"></div>
+    <div class="field"><label>Mesa de pool libre</label>
+      <div class="chiprow" id="pasar-destinos"></div>
+    </div>
+    <div class="field" id="pasar-vinculo">
+      <label>¿Qué hacemos con la mesa de salón?</label>
+      <div class="chiprow" id="pasar-vinculo-chips">
+        <button class="chip sel" data-v="1" onclick="selChip(this)">🔗 Mantener vinculada</button>
+        <button class="chip" data-v="0" onclick="selChip(this)">Liberarla</button>
+      </div>
+      <div style="font-size:12px;color:var(--on-surface-variant);margin-top:6px">Vinculada: siguen usando la mesa para sentarse y comparten una única cuenta. El cronómetro corre en la de pool.</div>
+    </div>
+    <div class="acciones">
+      <button class="btn text" onclick="cerrar('d-pasar')">Cancelar</button>
+      <button class="btn filled" onclick="confirmarPasar()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- cobro -->
+<div class="overlay" id="d-cobro" onclick="bg(event,'d-cobro')">
+  <div class="dialog">
+    <h2 id="cobro-titulo">Cobro</h2>
+    <div class="sub" id="cobro-sub"></div>
+    <div class="lista" id="cobro-desglose" style="margin-bottom:14px"></div>
+    <div class="field"><label>Descuento</label>
+      <div class="chiprow">
+        <button class="chip sel" onclick="setDesc(0,this)">Sin desc.</button>
+        <button class="chip" onclick="setDesc(10,this)">10%</button>
+        <button class="chip" onclick="setDesc(20,this)">20%</button>
+      </div>
+    </div>
+    <div class="field"><label>Medio de pago <span style="font-weight:400" id="recargo-label">(recargo: Crédito +8% · MercadoPago +5%)</span></label>
+      <div class="chiprow">
+        <button class="chip sel" onclick="setMedio('Efectivo',this)">💵 Efectivo</button>
+        <button class="chip" onclick="setMedio('Débito',this)">💳 Débito</button>
+        <button class="chip" onclick="setMedio('Crédito',this)">💳 Crédito</button>
+        <button class="chip" onclick="setMedio('Transferencia',this)">🏦 Transf.</button>
+        <button class="chip" onclick="setMedio('MercadoPago',this)">📱 MP</button>
+      </div>
+      <div style="margin-top:8px"><button class="btn text" onclick="snack('En producción: la cuenta se reparte entre varios medios y el sistema valida que la suma cierre')">＋ Pago dividido…</button></div>
+    </div>
+    <div class="field"><label>Propina (opcional, no integra recaudación)</label><input type="number" id="propina" placeholder="$ 0"></div>
+    <div class="acciones">
+      <button class="btn text" onclick="cerrar('d-cobro')">Volver</button>
+      <button class="btn filled" id="cobro-confirmar" onclick="confirmarCobro()">Confirmar cobro</button>
+    </div>
+  </div>
+</div>
+
+<!-- ticket -->
+<div class="overlay" id="d-ticket" onclick="bg(event,'d-ticket')">
+  <div class="dialog" style="max-width:360px">
+    <h2>Ticket no fiscal</h2>
+    <div class="sub">Se muestra en pantalla · se puede guardar como PDF</div>
+    <div class="ticket" id="ticket-body"></div>
+    <div class="acciones">
+      <button class="btn text" onclick="cerrar('d-ticket')">Cerrar</button>
+      <button class="btn filled" onclick="window.print()">🖨️ Imprimir / PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- compra -->
+<div class="overlay" id="d-compra" onclick="bg(event,'d-compra')">
+  <div class="dialog">
+    <h2>Registrar compra</h2>
+    <div class="sub">Suma stock, actualiza el costo y registra el egreso de dinero</div>
+    <div class="field"><label>Producto</label><select id="compra-prod" onchange="precargarCostoCompra()"></select></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="field"><label>Cantidad</label><input type="number" id="compra-cant" value="12" oninput="calcCompra()"></div>
+      <div class="field"><label>Costo unitario ($)</label><input type="number" id="compra-costo" oninput="calcCompra()"></div>
+    </div>
+    <div class="field"><label>Proveedor (opcional)</label><input type="text" id="compra-prov" placeholder="Distribuidora Sur"></div>
+    <div class="field"><label>Medio de pago</label><select id="compra-medio"><option>Efectivo</option><option selected>Transferencia</option><option>Débito</option><option>Crédito</option><option>MercadoPago</option></select></div>
+    <div class="lista"><div class="fila"><span>Total compra</span><span class="total" id="compra-total">$0</span></div></div>
+    <div class="acciones">
+      <button class="btn text" onclick="cerrar('d-compra')">Cancelar</button>
+      <button class="btn filled" onclick="confirmarCompra()">Guardar compra</button>
+    </div>
+  </div>
+</div>
+
+<!-- alta / edición de producto -->
+<div class="overlay" id="d-producto" onclick="bg(event,'d-producto')">
+  <div class="dialog">
+    <h2 id="producto-titulo">Nuevo producto</h2>
+    <div class="sub">Los empleados solo ven nombre y precio; costo y márgenes son del admin</div>
+    <div class="field"><label>Nombre</label><input type="text" id="prod-nombre" placeholder="Ej: Cerveza Brahma 1L"></div>
+    <div class="field"><label>Categoría</label><select id="prod-cat" onchange="toggleComboUI()"><option>Bebidas</option><option>Insumos</option><option>Otros</option><option>Promos</option></select></div>
+    <div class="field"><label>Precio de venta ($)</label><input type="number" id="prod-precio" placeholder="0" oninput="resumenCombo()"></div>
+    <div id="prod-normal">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="field"><label>Costo ($)</label><input type="number" id="prod-costo" placeholder="0"></div>
+        <div class="field"><label>Stock mínimo (alerta)</label><input type="number" id="prod-smin" placeholder="0"></div>
+      </div>
+      <div class="field"><label>Stock actual (vacío = preparado)</label><input type="number" id="prod-stock" placeholder="—"></div>
+    </div>
+    <div id="prod-combo" style="display:none">
+      <div class="field"><label>Componentes del combo (al vender descuenta el stock de cada uno)</label>
+        <div id="combo-lista"></div>
+        <button class="btn text" onclick="agregarComponente()">＋ Agregar componente</button>
+      </div>
+      <div class="lista" id="combo-resumen"></div>
+    </div>
+    <div class="acciones">
+      <button class="btn danger" id="producto-eliminar" onclick="eliminarProducto()">Eliminar</button>
+      <button class="btn text" onclick="cerrar('d-producto')">Cancelar</button>
+      <button class="btn filled" onclick="guardarProducto()">Guardar producto</button>
+    </div>
+  </div>
+</div>
+
+<!-- gasto (alta / edición) -->
+<div class="overlay" id="d-gasto" onclick="bg(event,'d-gasto')">
+  <div class="dialog">
+    <h2 id="gasto-titulo">Registrar gasto</h2>
+    <div class="sub">Impacta en el balance del período</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="field"><label>Fecha</label><input type="date" id="gasto-fecha"></div>
+      <div class="field"><label>Categoría</label><select id="gasto-cat"><option>Alquiler</option><option>Servicios</option><option>Sueldos</option><option>Mantenimiento</option><option>Impuestos</option><option>Otros</option></select></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="field"><label>Monto ($)</label><input type="number" id="gasto-monto" placeholder="0"></div>
+      <div class="field"><label>Medio de pago</label><select id="gasto-medio"><option selected>Efectivo</option><option>Transferencia</option><option>Débito</option><option>Crédito</option><option>MercadoPago</option></select></div>
+    </div>
+    <div class="field"><label>Detalle</label><input type="text" id="gasto-detalle" placeholder="Ej: reparación luz Mesa 9"></div>
+    <div class="field"><label>Tipo de gasto</label>
+      <div class="chiprow" id="gasto-fijo">
+        <button class="chip sel" data-f="0" onclick="selChip(this)">Variable</button>
+        <button class="chip" data-f="1" onclick="selChip(this)">📌 Fijo mensual</button>
+      </div>
+      <div style="font-size:12px;color:var(--on-surface-variant);margin-top:6px">Fijo: se repite todos los meses (alquiler, internet…). En producción el sistema los precarga solos cada mes.</div>
+    </div>
+    <div class="acciones">
+      <button class="btn danger" id="gasto-eliminar" onclick="eliminarGasto()">Eliminar</button>
+      <button class="btn text" onclick="cerrar('d-gasto')">Cancelar</button>
+      <button class="btn filled" onclick="guardarGasto()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- cierre de turno -->
+<div class="overlay" id="d-cierre" onclick="bg(event,'d-cierre')">
+  <div class="dialog">
+    <h2 id="cierre-titulo">Cierre de turno</h2>
+    <div class="sub">Contá el efectivo de la caja y declaralo</div>
+    <div class="lista" style="margin-bottom:14px" id="cierre-detalle"></div>
+    <div class="field"><label>Efectivo contado ($)</label><input type="number" id="declarado" oninput="calcDif()"></div>
+    <div class="lista"><div class="fila"><span>Diferencia</span><span id="dif" class="badge ok">$0 — caja perfecta</span></div></div>
+    <div class="acciones">
+      <button class="btn text" onclick="cerrar('d-cierre')">Cancelar</button>
+      <button class="btn filled" onclick="confirmarCierre()">Cerrar turno</button>
+    </div>
+  </div>
+</div>
+
+<!-- retiro / ingreso de caja -->
+<div class="overlay" id="d-caja" onclick="bg(event,'d-caja')">
+  <div class="dialog">
+    <h2>Retiro / ingreso de caja</h2>
+    <div class="sub">Movimiento de efectivo del turno (afecta el arqueo)</div>
+    <div class="field"><label>Tipo</label>
+      <div class="chiprow" id="caja-tipo">
+        <button class="chip sel" data-t="-1" onclick="selChip(this)">Retiro de efectivo</button>
+        <button class="chip" data-t="1" onclick="selChip(this)">Ingreso de efectivo</button>
+      </div>
+    </div>
+    <div class="field"><label>Monto ($)</label><input type="number" id="caja-monto" placeholder="0"></div>
+    <div class="field"><label>Motivo</label><input type="text" id="caja-motivo" placeholder="Ej: pago proveedor de hielo"></div>
+    <div class="acciones">
+      <button class="btn text" onclick="cerrar('d-caja')">Cancelar</button>
+      <button class="btn filled" onclick="confirmarCaja()">Registrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- abrir turno -->
+<div class="overlay" id="d-abrirturno" onclick="bg(event,'d-abrirturno')">
+  <div class="dialog">
+    <h2>Abrir turno</h2>
+    <div class="sub">En producción cada empleado entra con su PIN</div>
+    <div class="field"><label>Empleado del turno</label>
+      <select id="at-emp"></select>
+    </div>
+    <div class="field"><label>Efectivo inicial ($)</label><input type="number" id="at-inicial" value="20000"></div>
+    <div class="acciones">
+      <button class="btn text" onclick="cerrar('d-abrirturno')">Cancelar</button>
+      <button class="btn filled" onclick="confirmarTurnoNuevo()">Comenzar turno</button>
+    </div>
+  </div>
+</div>
+
+<!-- nuevo usuario -->
+<div class="overlay" id="d-usuario" onclick="bg(event,'d-usuario')">
+  <div class="dialog" style="max-width:360px">
+    <h2>Nuevo usuario</h2>
+    <div class="sub">El PIN es la clave con la que entra al sistema</div>
+    <div class="field"><label>Nombre</label><input type="text" id="us-nombre" placeholder="Ej: Pedro"></div>
+    <div class="field"><label>Rol</label><select id="us-rol"><option selected>Mozo</option><option>Caja</option><option>Admin</option></select></div>
+    <div class="field"><label>PIN (4 dígitos)</label><input type="password" id="us-pin" maxlength="4" placeholder="••••" style="text-align:center;letter-spacing:8px"></div>
+    <div class="acciones">
+      <button class="btn text" onclick="cerrar('d-usuario')">Cancelar</button>
+      <button class="btn filled" onclick="guardarUsuario()">Guardar usuario</button>
+    </div>
+  </div>
+</div>
+
+<div class="snackbar" id="snackbar"></div>
+
+<script>
+/* ============================================================
+   ESTADO REAL EN MEMORIA — todo lo que se toca se actualiza
+   ============================================================ */
+let TARIFA_HORA = 12000, TARIFA_MIN = TARIFA_HORA/60, REDONDEO = 100;
+const min = 60000;
+const RECARGOS = { 'Efectivo':0, 'Débito':0, 'Crédito':8, 'Transferencia':0, 'MercadoPago':5 };
+let usuarios = [ {n:'Diego',rol:'Admin'}, {n:'Lucas',rol:'Mozo'}, {n:'Sofía',rol:'Mozo'}, {n:'Marcos',rol:'Caja'} ];
+let pinAdmin = '1234';
+const ahora = Date.now();
+
+const productos = [
+  {n:'Cerveza Quilmes 1L', p:4500, s:36, c:'Bebidas', cost:2100, v:142},
+  {n:'Fernet + Coca', p:6500, s:null, c:'Bebidas', cost:2900, v:98},
+  {n:'Coca-Cola 500ml', p:3000, s:28, c:'Bebidas', cost:1400, v:87},
+  {n:'Papas fritas', p:3500, s:15, c:'Otros', cost:1700, v:64},
+  {n:'Agua mineral', p:2000, s:4, c:'Bebidas', cost:800, v:41, smin:10},
+  {n:'Maní salado', p:2500, s:2, c:'Otros', cost:1100, v:28, smin:8},
+  {n:'Tiza para taco', p:1500, s:22, c:'Insumos', cost:600, v:9},
+  {n:'Guante de billar', p:8000, s:6, c:'Insumos', cost:4200, v:3},
+  {n:'Promo: 2 Cervezas + Papas', p:11000, s:null, c:'Promos', cost:0, v:55, combo:[{n:'Cerveza Quilmes 1L',q:2},{n:'Papas fritas',q:1}]},
+];
+/* promos (combos): el precio es propio; el costo y la disponibilidad derivan de los componentes */
+const findProd = n => productos.find(p=>p.n===n);
+const isPromo = p => !!p.combo;
+const promoCost = p => p.combo.reduce((a,cm)=>{ const b=findProd(cm.n); return a + (b ? (b.cost||0)*cm.q : 0); }, 0);
+function promoStock(p){
+  let m = null;
+  for (const cm of p.combo){
+    const b = findProd(cm.n);
+    if (b && b.s !== null){ const d = Math.floor(b.s/cm.q); m = (m===null) ? d : Math.min(m,d); }
+  }
+  return m; // null = sin componentes stockeables (siempre disponible)
+}
+
+/* en cada ítem: q = total · env = unidades ya comandadas · ent = unidades entregadas.
+   Sin comandar = q-env · En preparación = env-ent */
+const mesas = {};
+for (let i = 1; i <= 12; i++) mesas[i] = { estado:'libre' };
+mesas[2] = { estado:'ocupada', jugador:'Martín', pers:2, inicio:ahora-72*min, limite:null, items:[{n:'Cerveza Quilmes 1L',p:4500,q:2,env:2,ent:2},{n:'Papas fritas',p:3500,q:1,env:1,ent:0}] };
+mesas[5] = { estado:'ocupada', jugador:'Lucas R.', pers:4, inicio:ahora-25*min, limite:null, items:[] };
+mesas[7] = { estado:'ocupada', jugador:'Diego F.', pers:2, inicio:ahora-64*min, limite:60, items:[{n:'Cerveza Quilmes 1L',p:4500,q:1,env:1,ent:1}] };
+mesas[9] = { estado:'pagando', jugador:'Ana', pers:3, inicio:ahora-123*min, fin:ahora-4*min, preTs:ahora-4*min, preH:null, limite:120, items:[{n:'Fernet + Coca',p:6500,q:2,env:2,ent:2}], vinculo:4 };
+
+const salon = {};
+for (let i = 1; i <= 10; i++) salon[i] = { estado:'libre' };
+salon[2] = { estado:'ocupada', cliente:'Familia González', pers:5, desde:'20:40', items:[{n:'Coca-Cola 500ml',p:3000,q:3,env:3,ent:3},{n:'Papas fritas',p:3500,q:2,env:2,ent:2},{n:'Maní salado',p:2500,q:1,env:1,ent:1}] };
+salon[4] = { estado:'vinculada', cliente:'Ana', pool:9 };
+salon[7] = { estado:'ocupada', cliente:'Hernán', pers:1, desde:'21:05', items:[{n:'Fernet + Coca',p:6500,q:1,env:1,ent:0}] };
+
+/* mostrador: cuentas tipo "bar tab" por nombre */
+const mostrador = {};
+let tabId = 0;
+mostrador[++tabId] = { cliente:'Javier', desde:'20:10', items:[{n:'Cerveza Quilmes 1L',p:4500,q:2,env:2,ent:2}] };
+mostrador[++tabId] = { cliente:'Romina', desde:'21:20', items:[{n:'Fernet + Coca',p:6500,q:1,env:1,ent:1},{n:'Maní salado',p:2500,q:1,env:1,ent:1}] };
+
+/* ===== comandas (KDS) e historial del salón ===== */
+let comandas = [], cmdSeq = 0;
+let historial = [];   // eventos {ts,h,tipo:'comanda'|'cobro',...} — comandas referencian el objeto vivo
+const hHM = d => new Date(d).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+function seedComanda(ts, label, cliente, items, coment, estado, src){
+  const c = { id:++cmdSeq, ts, h:hHM(ts), label, cliente, items, coment, estado, src };
+  comandas.push(c); historial.push({ ts, h:c.h, tipo:'comanda', ref:c });
+  return c;
+}
+seedComanda(ahora-40*min, 'Salón S2', 'Familia González', [{n:'Coca-Cola 500ml',q:3},{n:'Papas fritas',q:2},{n:'Maní salado',q:1}], '', 'lista', salon[2].items);
+seedComanda(ahora-9*min,  'Pool 2',   'Martín',           [{n:'Papas fritas',q:1}], '', 'pendiente', mesas[2].items);
+seedComanda(ahora-3*min,  'Salón S7', 'Hernán',           [{n:'Fernet + Coca',q:1}], 'Sin hielo, vaso aparte', 'pendiente', salon[7].items);
+mesas[9].preH = hHM(mesas[9].preTs);
+historial.push({ ts:mesas[9].preTs, h:mesas[9].preH, tipo:'precierre', detalle:'Pool 9 · Ana', monto:Math.floor((mesas[9].fin-mesas[9].inicio)/min)*200 + 13000 });
+/* cobros previos del turno también van al historial */
+[195,150,120,95,70,50].forEach((off,i)=>{ const m = [
+  { h:'18:25', detalle:'Pool 3 · Roberto', medio:'Efectivo', monto:19000 },
+  { h:'19:10', detalle:'Venta rápida', medio:'MercadoPago', monto:12500 },
+  { h:'19:40', detalle:'Salón S6 · Walter', medio:'Débito', monto:15000 },
+  { h:'20:05', detalle:'Pool 11 · Hernán', medio:'Crédito', monto:10000 },
+  { h:'20:30', detalle:'Venta rápida', medio:'MercadoPago', monto:10500 },
+  { h:'20:50', detalle:'Mostrador · Caro', medio:'Transferencia', monto:5000 },
+][i]; historial.push({ ts:ahora-off*min, h:m.h, tipo:'cobro', detalle:m.detalle, medio:m.medio, monto:m.monto }); });
+
+/* turno de caja actual (los cobros del boceto se registran acá) */
+let turno = {
+  abierto: true, empleado: 'Lucas', inicio: ahora - 200*min, efectivoInicial: 20000,
+  movs: [
+    { h:'18:25', tipo:'pool', detalle:'Pool 3 · Roberto', medio:'Efectivo', monto:19000, prop:1000 },
+    { h:'19:10', tipo:'venta', detalle:'Venta rápida', medio:'MercadoPago', monto:12500, prop:0 },
+    { h:'19:40', tipo:'salon', detalle:'Salón S6 · Walter', medio:'Débito', monto:15000, prop:500 },
+    { h:'20:05', tipo:'pool', detalle:'Pool 11 · Hernán', medio:'Crédito', monto:10000, prop:0 },
+    { h:'20:30', tipo:'venta', detalle:'Venta rápida', medio:'MercadoPago', monto:10500, prop:0 },
+    { h:'20:50', tipo:'mostrador', detalle:'Mostrador · Caro', medio:'Transferencia', monto:5000, prop:0 },
+  ],
+  cajaMovs: [ { h:'21:00', dir:-1, monto:5000, motivo:'pago proveedor de hielo' } ],
+};
+
+let ventaCart = [];          // venta rápida sin mesa
+let ctx = null;              // cuenta abierta: {tipo:'pool'|'salon'|'mostrador'|'venta', id}
+let pendienteAbrir = null;   // {tipo, id}
+let pasarCtx = null;         // {tipo:'salon'|'pool', id}
+let cobro = null;            // estado del cobro en curso
+
+/* ===== helpers ===== */
+const fmt = n => '$' + Math.round(n).toLocaleString('es-AR');
+const fmtTimer = ms => { const s=Math.floor(ms/1000); return String(Math.floor(s/3600)).padStart(2,'0')+':'+String(Math.floor(s%3600/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); };
+const horaHM = d => new Date(d).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+const sumItems = items => items.reduce((a,x)=>a+x.p*x.q,0);
+const r100 = x => REDONDEO ? Math.round(x/REDONDEO)*REDONDEO : Math.round(x);
+const esAlerta = m => m.estado==='ocupada' && m.limite && !m.fin && (Date.now()-m.inicio) >= m.limite*min;
+function getItems(){
+  if (ctx.tipo==='venta') return ventaCart;
+  if (ctx.tipo==='pool') return mesas[ctx.id].items;
+  if (ctx.tipo==='mostrador') return mostrador[ctx.id].items;
+  return salon[ctx.id].items;
+}
+function renderAll(){ renderMesas(); renderSalon(); renderMostrador(); }
+
+/* ============================================================
+   SALÓN — mesas dibujadas en SVG (vista cenital)
+   ============================================================ */
+function poolSVG(){
+  return `<svg viewBox="0 0 220 120" class="tsvg" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gWood" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#9a6b35"/><stop offset=".5" stop-color="#7d5226"/><stop offset="1" stop-color="#693f1c"/>
+    </linearGradient>
+    <radialGradient id="gFelt" cx="50%" cy="42%" r="80%">
+      <stop offset="0" stop-color="#2fa863"/><stop offset="1" stop-color="#1b6e40"/>
+    </radialGradient>
+  </defs>
+  <rect x="2" y="2" width="216" height="116" rx="14" fill="url(#gWood)" stroke="#46290f" stroke-width="2.5"/>
+  <rect x="16" y="16" width="188" height="88" rx="7" fill="url(#gFelt)"/>
+  <rect x="16" y="16" width="188" height="88" rx="7" fill="none" stroke="rgba(0,0,0,.28)" stroke-width="1.5"/>
+  <line x1="157" y1="17.5" x2="157" y2="102.5" stroke="rgba(255,255,255,.14)" stroke-width="1.5"/>
+  <circle cx="157" cy="60" r="2" fill="rgba(255,255,255,.35)"/>
+  <circle cx="17" cy="17" r="8.5" fill="#0b0b0b"/><circle cx="203" cy="17" r="8.5" fill="#0b0b0b"/>
+  <circle cx="17" cy="103" r="8.5" fill="#0b0b0b"/><circle cx="203" cy="103" r="8.5" fill="#0b0b0b"/>
+  <circle cx="110" cy="12.5" r="7.5" fill="#0b0b0b"/><circle cx="110" cy="107.5" r="7.5" fill="#0b0b0b"/>
+  ${[40,63,87,133,157,180].map(x=>`<circle cx="${x}" cy="8.5" r="1.7" fill="#e8d9b0"/><circle cx="${x}" cy="111.5" r="1.7" fill="#e8d9b0"/>`).join('')}
+  ${[38,60,82].map(y=>`<circle cx="8.5" cy="${y}" r="1.7" fill="#e8d9b0"/><circle cx="211.5" cy="${y}" r="1.7" fill="#e8d9b0"/>`).join('')}
+  </svg>`;
+}
+function mesaSVG(){
+  return `<svg viewBox="0 0 140 124" class="tsvg" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gWoodS" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#a87a45"/><stop offset="1" stop-color="#74501f"/>
+    </linearGradient>
+  </defs>
+  <rect x="46" y="3" width="48" height="17" rx="6" fill="#5d6b75"/>
+  <rect x="46" y="104" width="48" height="17" rx="6" fill="#5d6b75"/>
+  <rect x="3" y="44" width="17" height="36" rx="6" fill="#5d6b75"/>
+  <rect x="120" y="44" width="17" height="36" rx="6" fill="#5d6b75"/>
+  <rect x="22" y="20" width="96" height="84" rx="11" fill="url(#gWoodS)" stroke="#4c3312" stroke-width="2"/>
+  <rect x="31" y="29" width="78" height="66" rx="7" fill="none" stroke="rgba(0,0,0,.22)" stroke-width="1.5"/>
+  <circle cx="70" cy="62" r="3" fill="rgba(0,0,0,.18)"/>
+  </svg>`;
+}
+
+function renderMesas(){
+  const g = document.getElementById('grid-mesas'); g.innerHTML='';
+  for (let i = 1; i <= 12; i++){
+    const m = mesas[i], d = document.createElement('div');
+    if (m.estado === 'libre'){
+      d.className = 'tcard libre';
+      d.innerHTML = `<div class="tnum">Pool ${i}</div><div class="tchip">LIBRE</div>${poolSVG()}
+        <div class="tinfo"><span class="lib">Tocar para abrir</span></div>`;
+      d.onclick = () => abrirDialogoAbrir('pool', i);
+    } else if (m.estado === 'pagando'){
+      const t = m.fin-m.inicio, imp = (t/min)*TARIFA_MIN + sumItems(m.items);
+      d.className = 'tcard pagando';
+      d.innerHTML = `<div class="tnum">Pool ${i}</div><div class="tchip">💳 PAGANDO</div>${poolSVG()}
+        <div class="tinfo">
+          <span class="nom">${m.jugador}</span>
+          <span class="tmr">${fmtTimer(t)}</span>
+          <span class="imp">${fmt(imp)}</span>
+          <span class="det">${m.pers?'👥 '+m.pers+' · ':''}cuenta en caja · tiempo congelado</span>
+        </div>`;
+      d.onclick = () => abrirCuenta('pool', i);
+    } else {
+      const t = Date.now()-m.inicio, cons = sumItems(m.items), imp = (t/min)*TARIFA_MIN + cons;
+      const al = esAlerta(m);
+      d.className = 'tcard ' + (al ? 'alerta' : 'ocupada');
+      d.innerHTML = `<div class="tnum">Pool ${i}</div><div class="tchip">${al?'⏰ TIEMPO':'OCUPADA'}</div>${poolSVG()}
+        <div class="tinfo">
+          <span class="nom">${m.jugador}</span>
+          <span class="tmr timer" data-m="${i}">${fmtTimer(t)}</span>
+          <span class="imp" data-i="${i}">${fmt(imp)}</span>
+          <span class="det">${m.pers?'👥 '+m.pers+' · ':''}${m.vinculo?'🔗 S'+m.vinculo+' · ':''}${m.limite ? 'pidió '+(m.limite>=60? m.limite/60+' h':m.limite+' min') : 'sin límite'}${cons?' · 🍺':''}</span>
+        </div>`;
+      d.onclick = () => abrirCuenta('pool', i);
+    }
+    g.appendChild(d);
+  }
+  const act = Object.values(mesas).filter(x=>x.estado!=='libre').length;
+  const k = document.getElementById('kpi-activas'); if (k) k.textContent = act + ' / 12';
+}
+
+function renderMostrador(){
+  const g = document.getElementById('grid-mostrador'); g.innerHTML='';
+  Object.keys(mostrador).forEach(id=>{
+    const t = mostrador[id];
+    const ini = t.cliente.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const d = document.createElement('div');
+    d.className = 'tabcard';
+    if (t.pagando) d.style.borderLeftColor = '#3d7df0';
+    d.innerHTML = `<div class="avatar">${ini}</div>
+      <div class="info"><div class="n">${t.cliente}</div><div class="d">${t.pagando?'💳 PAGANDO · ':''}desde ${t.desde} · ${t.items.reduce((a,x)=>a+x.q,0)} ítems</div></div>
+      <div class="tot">${fmt(sumItems(t.items))}</div>`;
+    d.onclick = () => abrirCuenta('mostrador', +id);
+    g.appendChild(d);
+  });
+  if (rol !== 'mozo'){
+    const nuevo = document.createElement('button');
+    nuevo.className = 'tab-new';
+    nuevo.innerHTML = '＋ Nueva cuenta';
+    nuevo.onclick = () => abrirDialogoAbrir('mostrador', 0);
+    g.appendChild(nuevo);
+  }
+}
+
+function renderSalon(){
+  const g = document.getElementById('grid-salon'); g.innerHTML='';
+  for (let i = 1; i <= 10; i++){
+    const m = salon[i], d = document.createElement('div');
+    if (m.estado === 'libre'){
+      d.className = 'tcard libre';
+      d.innerHTML = `<div class="tnum">S${i}</div><div class="tchip">LIBRE</div>${mesaSVG()}
+        <div class="tinfo"><span class="lib">Tocar para abrir</span></div>`;
+      d.onclick = () => abrirDialogoAbrir('salon', i);
+    } else if (m.estado === 'vinculada'){
+      d.className = 'tcard vinculada';
+      d.innerHTML = `<div class="tnum">S${i}</div><div class="tchip">🔗 POOL ${m.pool}</div>${mesaSVG()}
+        <div class="tinfo"><span class="nom">${m.cliente}</span><span class="det">cuenta única con Pool ${m.pool}</span></div>`;
+      d.onclick = () => abrirCuenta('pool', m.pool);
+    } else {
+      const tot = sumItems(m.items);
+      const pag = m.estado === 'pagando';
+      d.className = 'tcard ' + (pag ? 'pagando' : 'ocupada');
+      d.innerHTML = `<div class="tnum">S${i}</div><div class="tchip">${pag?'💳 PAGANDO':'OCUPADA'}</div>${mesaSVG()}
+        <div class="tinfo">
+          <span class="nom">${m.cliente}</span>
+          <span class="imp">${fmt(tot)}</span>
+          <span class="det">${m.pers?'👥 '+m.pers+' · ':''}desde ${m.desde} · ${m.items.reduce((a,x)=>a+x.q,0)} ítems</span>
+        </div>`;
+      d.onclick = () => abrirCuenta('salon', i);
+    }
+    g.appendChild(d);
+  }
+}
+
+/* tick: cronómetros e importes en vivo (y cuenta abierta si es pool) */
+setInterval(()=>{
+  document.querySelectorAll('.timer[data-m]').forEach(el=>{
+    const m = mesas[el.dataset.m]; if (m.inicio) el.textContent = fmtTimer(Date.now()-m.inicio);
+  });
+  document.querySelectorAll('[data-i]').forEach(el=>{
+    const m = mesas[el.dataset.i]; if (m.inicio) el.textContent = fmt(((Date.now()-m.inicio)/min)*TARIFA_MIN + sumItems(m.items));
+  });
+  if (ctx && ctx.tipo==='pool' && document.getElementById('d-cuenta').classList.contains('open')) actualizarTiempoCuenta();
+}, 1000);
+setInterval(()=>{ renderMesas(); if (pantalla==='comandas') renderComandas(); if (pantalla==='cajero') renderCajero(); }, 15000); // refresco de estados (alerta por tiempo / aging de comandas y pre-cierres)
+
+/* ============================================================
+   ABRIR MESA
+   ============================================================ */
+function abrirDialogoAbrir(tipo, id){
+  pendienteAbrir = { tipo, id };
+  const tit = { pool:'Abrir Pool '+id, salon:'Abrir Salón S'+id, mostrador:'Nueva cuenta — Mostrador' };
+  const sub = { pool:`Tarifa ${fmt(TARIFA_HORA)}/h · cobro por minuto (${fmt(TARIFA_MIN)}/min)`, salon:'Solo consumos · sin cargo por tiempo', mostrador:'Cuenta por nombre · queda abierta hasta que se cobre' };
+  document.getElementById('abrir-titulo').textContent = tit[tipo];
+  document.getElementById('abrir-sub').textContent = sub[tipo];
+  document.getElementById('abrir-tiempo').style.display = tipo==='pool' ? '' : 'none';
+  document.getElementById('abrir-pers-field').style.display = tipo==='mostrador' ? 'none' : '';
+  document.querySelectorAll('#abrir-pers .chip').forEach(c=>c.classList.remove('sel'));
+  document.getElementById('abrir-nombre').value = '';
+  abrir('d-abrir');
+  setTimeout(()=>document.getElementById('abrir-nombre').focus(), 80);
+}
+function confirmarAbrir(){
+  const nombre = document.getElementById('abrir-nombre').value.trim() || 'Cliente';
+  const limite = +([...document.querySelectorAll('#abrir-chips .chip')].find(c=>c.classList.contains('sel'))?.dataset.min || 0) || null;
+  let pers = null;
+  if (pendienteAbrir.tipo !== 'mostrador'){
+    pers = +(document.querySelector('#abrir-pers .chip.sel')?.dataset.p || 0);
+    if (!pers){ snack('⚠️ Indicá cuántas personas van a estar en la mesa'); return; }
+  }
+  if (pendienteAbrir.tipo === 'pool'){
+    mesas[pendienteAbrir.id] = { estado:'ocupada', jugador:nombre, pers, inicio:Date.now(), limite, items:[] };
+    snack('✅ Pool '+pendienteAbrir.id+' abierta — '+pers+' personas, cronómetro corriendo');
+  } else if (pendienteAbrir.tipo === 'salon'){
+    salon[pendienteAbrir.id] = { estado:'ocupada', cliente:nombre, pers, desde:horaHM(Date.now()), items:[] };
+    snack('✅ Salón S'+pendienteAbrir.id+' abierta — '+pers+' personas');
+  } else {
+    mostrador[++tabId] = { cliente:nombre, desde:horaHM(Date.now()), items:[] };
+    snack('✅ Cuenta de '+nombre+' abierta en mostrador');
+    cerrar('d-abrir'); renderAll();
+    abrirCuenta('mostrador', tabId);   // directo a cargar productos
+    return;
+  }
+  cerrar('d-abrir'); renderAll();
+}
+
+/* ============================================================
+   CUENTA UNIFICADA (patrón POS: buscador → más vendidos → ticket)
+   ============================================================ */
+function abrirCuenta(tipo, id){
+  ctx = { tipo, id };
+  const t = document.getElementById('cuenta-titulo'), s = document.getElementById('cuenta-sub');
+  if (tipo === 'pool'){
+    const m = mesas[id];
+    t.textContent = `Pool ${id} — ${m.jugador}`;
+    s.textContent = `Abierta ${horaHM(m.inicio)} · ` + (m.pers ? `👥 ${m.pers} personas · ` : '') + (m.vinculo ? `🔗 vinculada a Salón S${m.vinculo} (cuenta única) · ` : '') + (m.limite ? `pidió ${m.limite>=60? m.limite/60+' h':m.limite+' min'}` : 'sin límite');
+  } else if (tipo === 'salon'){
+    const m = salon[id];
+    t.textContent = `Salón S${id} — ${m.cliente}`;
+    s.textContent = `Abierta ${m.desde} · ` + (m.pers ? `👥 ${m.pers} personas · ` : '') + 'solo consumos';
+  } else if (tipo === 'mostrador'){
+    const m = mostrador[id];
+    t.textContent = `Mostrador — ${m.cliente}`;
+    s.textContent = `Cuenta abierta ${m.desde} · se mantiene hasta cobrar`;
+  } else {
+    t.textContent = 'Venta rápida';
+    s.textContent = 'Sin mesa asociada · cobra al instante';
+  }
+  const pag = cuentaPagando();
+  if (pag) s.textContent += ' · 💳 EN CAJA — cuenta cerrada para agregar';
+  document.querySelector('#d-cuenta .search-box').style.display = pag ? 'none' : '';
+  document.getElementById('resultados').style.display = pag ? 'none' : '';
+  document.getElementById('resultados-label').style.display = pag ? 'none' : '';
+  document.getElementById('buscar').value = '';
+  renderResultados();
+  renderItemsCuenta();
+  renderAccionesCuenta();
+  abrir('d-cuenta');
+}
+
+/* buscador + quick keys */
+function renderResultados(){
+  const q = document.getElementById('buscar').value.trim().toLowerCase();
+  const cont = document.getElementById('resultados'), label = document.getElementById('resultados-label');
+  let lista;
+  if (q){
+    lista = productos.filter(p => p.n.toLowerCase().includes(q));
+    label.textContent = lista.length ? `Resultados (${lista.length})` : 'Sin resultados — probá otro nombre';
+  } else {
+    lista = [...productos].sort((a,b)=>b.v-a.v).slice(0,6);
+    label.textContent = '★ Más vendidos';
+  }
+  cont.innerHTML = '';
+  lista.forEach(p=>{
+    const disp = isPromo(p) ? promoStock(p) : p.s;
+    const sinStock = disp !== null && disp <= 0;
+    const b = document.createElement('button');
+    b.className = 'qk' + (sinStock ? ' off' : '');
+    const st = isPromo(p) ? ('🎁 combo' + (disp!==null ? ' · disp. '+disp : '')) : (p.s===null ? 'preparado' : (sinStock ? 'SIN STOCK' : 'stock '+p.s));
+    b.innerHTML = `<span class="n">${p.n}</span><span class="p">${fmt(p.p)}</span> <span class="st">${st}</span>`;
+    b.onclick = () => agregarItem(p);
+    cont.appendChild(b);
+  });
+}
+
+function agregarItem(p){
+  if (cuentaPagando()){ snack('💳 La cuenta está en caja — reabrila para modificarla'); return; }
+  if (isPromo(p)){
+    const disp = promoStock(p);
+    if (disp !== null && disp <= 0){ snack('Sin stock para armar '+p.n); return; }
+    p.combo.forEach(cm=>{ const b=findProd(cm.n); if (b && b.s !== null) b.s -= cm.q; }); // descuenta componentes
+  } else if (p.s !== null){
+    if (p.s <= 0){ snack('Sin stock de '+p.n); return; }
+    p.s--;
+  }
+  const items = getItems();
+  const ex = items.find(x=>x.n===p.n);
+  if (ex) ex.q++; else items.push({n:p.n, p:p.p, q:1, env:0, ent:0});
+  renderItemsCuenta(); renderAccionesCuenta(); renderResultados(); renderAll(); renderTablaProd();
+}
+function cambiarQty(idx, delta){
+  if (cuentaPagando()){ snack('💳 La cuenta está en caja — reabrila para modificarla'); return; }
+  const items = getItems();
+  const it = items[idx];
+  if (delta < 0 && it.q-1 < (it.env||0)){ snack('⚠️ Ya está comandado — solo Caja/Admin pueden editarlo desde Comandas'); return; }
+  const p = findProd(it.n);
+  if (p && isPromo(p)){
+    if (delta > 0){ const disp = promoStock(p); if (disp !== null && disp <= 0){ snack('Sin stock para armar '+it.n); return; } }
+    p.combo.forEach(cm=>{ const b=findProd(cm.n); if (b && b.s !== null) b.s -= delta*cm.q; });
+  } else if (p && p.s !== null){
+    if (delta > 0 && p.s <= 0){ snack('Sin stock de '+it.n); return; }
+    p.s -= delta;
+  }
+  it.q += delta;
+  if (it.q <= 0) items.splice(idx,1);
+  renderItemsCuenta(); renderAccionesCuenta(); renderResultados(); renderAll(); renderTablaProd();
+}
+
+function renderItemsCuenta(){
+  const cont = document.getElementById('cuenta-items');
+  const items = getItems();
+  let html = '';
+  if (ctx.tipo === 'pool'){
+    const m = mesas[ctx.id], mm = Math.floor(((m.fin||Date.now())-m.inicio)/min);
+    html += `<div class="fila"><span>⏱️ Tiempo (<span id="ct-min">${mm} min</span>)${m.fin?' ❄️ congelado':''}</span><span class="money" id="ct-imp">${fmt(mm*TARIFA_MIN)}</span></div>`;
+  }
+  if (!items.length && ctx.tipo!=='pool') html += `<div class="fila"><span style="color:var(--on-surface-variant)">Sin consumos todavía — tocá un producto arriba</span></div>`;
+  items.forEach((it,i)=>{
+    const env = it.env||0, ent = it.ent||0, nuevo = it.q-env, prep = env-ent;
+    let st = '';
+    if (ent)   st += ` <span class="istate ent">✓ ${ent} entregado</span>`;
+    if (prep)  st += ` <span class="istate pend">🔔 ${prep} en preparación</span>`;
+    if (nuevo) st += ` <span class="istate new">${nuevo} sin comandar</span>`;
+    html += `<div class="fila">
+      <span class="qtyrow" style="flex-wrap:wrap"><button class="step" onclick="cambiarQty(${i},-1)">−</button><b>${it.q}</b><button class="step" onclick="cambiarQty(${i},1)">＋</button> <span>${it.n}</span>${st}</span>
+      <span class="money">${fmt(it.p*it.q)}</span></div>`;
+  });
+  const tot = sumItems(items) + (ctx.tipo==='pool' ? Math.floor(((mesas[ctx.id].fin||Date.now())-mesas[ctx.id].inicio)/min)*TARIFA_MIN : 0);
+  html += `<div class="fila"><span>Total parcial</span><span class="total" id="ct-total">${fmt(tot)}</span></div>`;
+  cont.innerHTML = html;
+}
+function actualizarTiempoCuenta(){
+  const m = mesas[ctx.id]; if (!m.inicio || m.fin) return;
+  const mm = Math.floor((Date.now()-m.inicio)/min);
+  const e1 = document.getElementById('ct-min'), e2 = document.getElementById('ct-imp'), e3 = document.getElementById('ct-total');
+  if (e1) e1.textContent = mm + ' min';
+  if (e2) e2.textContent = fmt(mm*TARIFA_MIN);
+  if (e3) e3.textContent = fmt(mm*TARIFA_MIN + sumItems(m.items));
+}
+
+function renderAccionesCuenta(){
+  const a = document.getElementById('cuenta-acciones');
+  if (ctx.tipo === 'venta'){
+    a.innerHTML = `<button class="btn text" onclick="ventaCart=[];renderItemsCuenta()">Vaciar</button>
+      <button class="btn tonal" onclick="cerrar('d-cuenta')">Cancelar</button>
+      <button class="btn filled" onclick="abrirCobro()">Cobrar</button>`;
+    return;
+  }
+  if (cuentaPagando()){
+    a.innerHTML = `<button class="btn text" onclick="reabrirDesdeCuenta()">↩ Reabrir cuenta</button>
+      <button class="btn tonal" onclick="cerrar('d-cuenta')">Volver</button>
+      ${rol!=='mozo' ? `<button class="btn filled" onclick="abrirCobro()">💰 Cobrar</button>` : ''}`;
+    return;
+  }
+  const nCmd = sinComandar(getItems());
+  const btnCmd = nCmd ? `<button class="btn tonal" style="background:var(--tertiary-container);color:var(--on-tertiary-container)" onclick="abrirComandar()">🧾 Comandar (${nCmd})</button>` : '';
+  const mover = ctx.tipo==='pool'
+    ? `<button class="btn text" onclick="abrirPasar('pool',${ctx.id})">Mover de mesa</button>`
+    : `<button class="btn text" onclick="abrirPasar('${ctx.tipo}',${ctx.id})">🎱 Pasar a pool…</button>`;
+  const cierre = rol==='mozo'
+    ? `<button class="btn filled" onclick="enviarPreCierre()">📤 Enviar a caja</button>`
+    : `<button class="btn outlined" onclick="enviarPreCierre()">📤 A caja</button>
+       <button class="btn filled" onclick="abrirCobro()">💰 Cobrar</button>`;
+  a.innerHTML = `${mover}${btnCmd}<button class="btn tonal" onclick="cerrar('d-cuenta')">Volver</button>${cierre}`;
+}
+
+/* ============================================================
+   CAJERO + PRE-CIERRE — el mozo pide la cuenta, la caja cobra.
+   Estado "pagando": cronómetro congelado, cuenta cerrada para agregar.
+   ============================================================ */
+function cuentaPagando(){
+  if (!ctx) return false;
+  if (ctx.tipo==='pool') return mesas[ctx.id]?.estado==='pagando';
+  if (ctx.tipo==='salon') return salon[ctx.id]?.estado==='pagando';
+  if (ctx.tipo==='mostrador') return !!mostrador[ctx.id]?.pagando;
+  return false;
+}
+function totalDe(tipo, id){
+  if (tipo==='pool'){ const m = mesas[id]; return Math.floor(((m.fin||Date.now())-m.inicio)/min)*TARIFA_MIN + sumItems(m.items); }
+  if (tipo==='salon') return sumItems(salon[id].items);
+  return sumItems(mostrador[id].items);
+}
+function enviarPreCierre(){
+  const [label, cliente] = etiquetaCtx();
+  if (sinComandar(getItems())){ snack('⚠️ Hay productos sin comandar — comandalos o quitalos antes de pedir la cuenta'); return; }
+  const ts = Date.now();
+  if (ctx.tipo==='pool'){ const m = mesas[ctx.id]; m.estado='pagando'; m.fin=ts; m.preTs=ts; m.preH=horaHM(ts); }
+  else if (ctx.tipo==='salon'){ const m = salon[ctx.id]; m.estado='pagando'; m.preTs=ts; m.preH=horaHM(ts); }
+  else { const t = mostrador[ctx.id]; t.pagando=true; t.preTs=ts; t.preH=horaHM(ts); }
+  const tot = totalDe(ctx.tipo, ctx.id);
+  historial.push({ ts, h:horaHM(ts), tipo:'precierre', detalle:label+' · '+cliente, monto:tot });
+  cerrar('d-cuenta');
+  renderAll(); renderCajero(); badgeCajero();
+  snack('📤 Pre-cierre de '+label+' enviado a caja — '+fmt(tot)+(ctx.tipo==='pool'?' · tiempo congelado':''));
+}
+function cancelarPreCierre(tipo, id){
+  let label = tipo==='pool' ? 'Pool '+id : tipo==='salon' ? 'Salón S'+id : 'Mostrador';
+  if (tipo==='pool'){ const m = mesas[id]; m.estado='ocupada'; if (m.fin){ m.inicio += Date.now()-m.fin; m.fin=null; } m.preTs=null; }
+  else if (tipo==='salon'){ const m = salon[id]; m.estado='ocupada'; m.preTs=null; }
+  else { const t = mostrador[id]; t.pagando=false; t.preTs=null; }
+  historial.push({ ts:Date.now(), h:horaHM(Date.now()), tipo:'precierre', detalle:label, reabierto:true });
+  renderAll(); renderCajero(); badgeCajero();
+  snack('↩ '+label+' reabierta — '+(tipo==='pool'?'el cronómetro sigue corriendo':'se pueden agregar consumos'));
+}
+function reabrirDesdeCuenta(){
+  cancelarPreCierre(ctx.tipo, ctx.id);
+  abrirCuenta(ctx.tipo, ctx.id);
+}
+function cuentasPagando(){
+  const out = [];
+  Object.keys(mesas).forEach(i=>{ const m=mesas[i]; if (m.estado==='pagando') out.push({tipo:'pool', id:+i, label:'Pool '+i, cliente:m.jugador, preTs:m.preTs, preH:m.preH, tot:totalDe('pool',+i)}); });
+  Object.keys(salon).forEach(i=>{ const m=salon[i]; if (m.estado==='pagando') out.push({tipo:'salon', id:+i, label:'Salón S'+i, cliente:m.cliente, preTs:m.preTs, preH:m.preH, tot:totalDe('salon',+i)}); });
+  Object.keys(mostrador).forEach(i=>{ const t=mostrador[i]; if (t.pagando) out.push({tipo:'mostrador', id:+i, label:'Mostrador', cliente:t.cliente, preTs:t.preTs, preH:t.preH, tot:totalDe('mostrador',+i)}); });
+  return out.sort((a,b)=>a.preTs-b.preTs);
+}
+function badgeCajero(){
+  const n = cuentasPagando().length;
+  const b = document.getElementById('badge-cajero');
+  if (b){ b.style.display = n ? '' : 'none'; b.textContent = n; }
+}
+function cobrarDesdeCajero(tipo, id){ ctx = { tipo, id }; abrirCobro(); }
+function renderCajero(){
+  const gp = document.getElementById('cajero-pendientes'); if (!gp) return;
+  const pend = cuentasPagando();
+  gp.innerHTML = pend.length ? '' : '<div class="card" style="grid-column:1/-1;text-align:center;color:var(--on-surface-variant);padding:26px">💳 Nadie esperando pagar</div>';
+  pend.forEach(c=>{
+    const mins = Math.floor((Date.now()-c.preTs)/min);
+    const d = document.createElement('div');
+    d.className = 'cmd-card pago';
+    d.innerHTML = `<div class="cmd-head"><span class="cmd-mesa">${c.label} · ${c.cliente}</span><span class="cmd-age">⏱ ${mins} min</span></div>
+      <div style="font-size:21px;font-weight:800;color:var(--primary)">${fmt(c.tot)}</div>
+      <div style="font-size:11.5px;color:var(--on-surface-variant)">pre-cierre ${c.preH}${c.tipo==='pool'?' · tiempo congelado':''}</div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:auto">
+        <button class="btn text" onclick="cancelarPreCierre('${c.tipo}',${c.id})">↩ Reabrir</button>
+        <button class="btn filled" onclick="cobrarDesdeCajero('${c.tipo}',${c.id})">💰 Cobrar</button>
+      </div>`;
+    gp.appendChild(d);
+  });
+  const ga = document.getElementById('cajero-abiertas');
+  let rows = '';
+  Object.keys(mesas).forEach(i=>{ const m=mesas[i]; if (m.estado==='ocupada') rows += `<div class="fila" style="cursor:pointer" onclick="abrirCuenta('pool',${i})"><span>🎱 Pool ${i} · ${m.jugador}<br><span style="font-size:12px;color:var(--on-surface-variant)">${m.items.reduce((a,x)=>a+x.q,0)} ítems · tiempo corriendo</span></span><span class="money">${fmt(totalDe('pool',+i))}</span></div>`; });
+  Object.keys(salon).forEach(i=>{ const m=salon[i]; if (m.estado==='ocupada') rows += `<div class="fila" style="cursor:pointer" onclick="abrirCuenta('salon',${i})"><span>🪑 Salón S${i} · ${m.cliente}<br><span style="font-size:12px;color:var(--on-surface-variant)">${m.items.reduce((a,x)=>a+x.q,0)} ítems</span></span><span class="money">${fmt(totalDe('salon',+i))}</span></div>`; });
+  Object.keys(mostrador).forEach(i=>{ const t=mostrador[i]; if (!t.pagando) rows += `<div class="fila" style="cursor:pointer" onclick="abrirCuenta('mostrador',${i})"><span>🍻 Mostrador · ${t.cliente}<br><span style="font-size:12px;color:var(--on-surface-variant)">${t.items.reduce((a,x)=>a+x.q,0)} ítems</span></span><span class="money">${fmt(totalDe('mostrador',+i))}</span></div>`; });
+  ga.innerHTML = rows || '<div class="fila"><span style="color:var(--on-surface-variant)">Sin cuentas abiertas</span></div>';
+}
+
+/* ============================================================
+   COMANDAS (KDS) — patrón Toast/Square: comandar → preparar → entregar
+   ============================================================ */
+const sinComandar = items => items.reduce((a,x)=>a+(x.q-(x.env||0)),0);
+function etiquetaCtx(){
+  if (ctx.tipo==='pool') return ['Pool '+ctx.id, mesas[ctx.id].jugador];
+  if (ctx.tipo==='salon') return ['Salón S'+ctx.id, salon[ctx.id].cliente];
+  return ['Mostrador', mostrador[ctx.id].cliente];
+}
+function abrirComandar(){
+  const items = getItems();
+  const pend = items.filter(x=>x.q-(x.env||0) > 0);
+  if (!pend.length){ snack('No hay productos nuevos para comandar'); return; }
+  document.getElementById('comandar-sub').textContent = document.getElementById('cuenta-titulo').textContent;
+  document.getElementById('comandar-items').innerHTML = pend.map(x=>
+    `<div class="fila"><span><b>${x.q-(x.env||0)} ×</b> ${x.n}</span><span class="money">${fmt(x.p*(x.q-(x.env||0)))}</span></div>`).join('');
+  document.getElementById('comandar-coment').value = '';
+  abrir('d-comandar');
+  setTimeout(()=>document.getElementById('comandar-coment').focus(), 80);
+}
+function confirmarComandar(){
+  const items = getItems();
+  const env = items.filter(x=>x.q-(x.env||0) > 0).map(x=>({ n:x.n, q:x.q-(x.env||0) }));
+  if (!env.length){ cerrar('d-comandar'); return; }
+  items.forEach(x=>{ x.env = x.q; x.ent = x.ent||0; });
+  const [label, cliente] = etiquetaCtx();
+  const c = { id:++cmdSeq, ts:Date.now(), h:horaHM(Date.now()), label, cliente,
+              items:env, coment:document.getElementById('comandar-coment').value.trim(),
+              estado:'pendiente', src:items };
+  comandas.push(c);
+  historial.push({ ts:c.ts, h:c.h, tipo:'comanda', ref:c });
+  cerrar('d-comandar');
+  renderItemsCuenta(); renderAccionesCuenta(); renderComandas(); badgeComandas();
+  snack('🧾 Comanda #'+c.id+' enviada a preparación — '+env.reduce((a,x)=>a+x.q,0)+' ítems de '+label);
+}
+function marcarLista(id){
+  const c = comandas.find(x=>x.id===id);
+  if (!c || c.estado!=='pendiente') return;
+  c.estado = 'lista'; c.tsListo = Date.now();
+  c.items.forEach(ci=>{
+    const it = c.src.find(x=>x.n===ci.n);
+    if (it) it.ent = Math.min((it.ent||0)+ci.q, it.env||0);
+  });
+  renderComandas(); badgeComandas(); renderHistorial();
+  if (ctx && document.getElementById('d-cuenta').classList.contains('open')){ renderItemsCuenta(); renderAccionesCuenta(); }
+  snack('✅ Comanda #'+c.id+' lista y entregada — '+c.label);
+}
+function badgeComandas(){
+  const n = comandas.filter(c=>c.estado==='pendiente').length;
+  const b = document.getElementById('badge-comandas');
+  if (b){ b.style.display = n ? '' : 'none'; b.textContent = n; }
+}
+function renderComandas(){
+  const g = document.getElementById('cmd-grid'); if (!g) return;
+  const pend = comandas.filter(c=>c.estado==='pendiente').sort((a,b)=>a.ts-b.ts);
+  if (!pend.length){
+    g.innerHTML = '<div class="card" style="grid-column:1/-1;text-align:center;color:var(--on-surface-variant);padding:34px">🧾 No hay comandas pendientes — todo entregado</div>';
+    return;
+  }
+  g.innerHTML = '';
+  pend.forEach(c=>{
+    const mins = Math.floor((Date.now()-c.ts)/min);
+    const cls = mins >= 10 ? 'late' : mins >= 5 ? 'warn' : '';
+    const d = document.createElement('div');
+    d.className = 'cmd-card ' + cls;
+    d.innerHTML = `<div class="cmd-head"><span class="cmd-mesa">${c.label} · ${c.cliente}</span><span class="cmd-age">⏱ ${mins} min</span></div>
+      <div class="cmd-items">${c.items.map(x=>`<b>${x.q} ×</b> ${x.n}`).join('<br>')}</div>
+      ${c.coment ? `<div class="cmd-coment">💬 ${c.coment}</div>` : ''}
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;gap:6px">
+        <span style="font-size:11px;color:var(--on-surface-variant)">#${c.id} · ${c.h}</span>
+        <span style="display:flex;gap:6px">
+          ${rol!=='mozo' ? `<button class="btn text" onclick="abrirEditarCmd(${c.id})">✏️ Editar</button>` : ''}
+          <button class="btn filled" onclick="marcarLista(${c.id})">✓ Lista</button>
+        </span>
+      </div>`;
+    g.appendChild(d);
+  });
+}
+
+/* ===== edición de comandas (Caja/Admin, con motivo y auditoría) ===== */
+function ajustarStock(n, delta){   // delta>0 consume, delta<0 devuelve · false = sin stock
+  const p = findProd(n); if (!p) return true;
+  if (isPromo(p)){
+    if (delta>0){ const d = promoStock(p); if (d!==null && d<delta) return false; }
+    p.combo.forEach(cm=>{ const b=findProd(cm.n); if (b && b.s!==null) b.s -= delta*cm.q; });
+    return true;
+  }
+  if (p.s!==null){ if (delta>0 && p.s<delta) return false; p.s -= delta; }
+  return true;
+}
+let editCmd = null;
+function abrirEditarCmd(id){
+  if (rol==='mozo'){ snack('🔒 El mozo no puede editar comandas enviadas — pedilo a caja'); return; }
+  const c = comandas.find(x=>x.id===id);
+  if (!c || c.estado!=='pendiente') return;
+  editCmd = { id, items: c.items.map(x=>({...x})) };
+  document.getElementById('editcmd-num').textContent = '#'+id;
+  document.getElementById('editcmd-sub').textContent = c.label+' · '+c.cliente+' — los cambios actualizan la cuenta, el stock y el cobro';
+  document.getElementById('editcmd-prod').innerHTML = productos.map(p=>`<option>${p.n}</option>`).join('');
+  document.getElementById('editcmd-motivo').value = '';
+  renderEditCmd();
+  abrir('d-editcmd');
+}
+function renderEditCmd(){
+  document.getElementById('editcmd-items').innerHTML = editCmd.items.map((x,i)=>
+    `<div class="fila"><span class="qtyrow"><button class="step" onclick="editCmdQty(${i},-1)">−</button><b>${x.q}</b><button class="step" onclick="editCmdQty(${i},1)">＋</button> <span>${x.n}</span></span><button class="step" onclick="editCmdQty(${i},-99)">✕</button></div>`).join('')
+    || '<div class="fila"><span style="color:var(--on-surface-variant)">Sin ítems — al guardar, la comanda se cancela</span></div>';
+}
+function editCmdQty(i, d){
+  const it = editCmd.items[i];
+  if (d <= -99 || it.q+d <= 0) editCmd.items.splice(i,1); else it.q += d;
+  renderEditCmd();
+}
+function editCmdAgregar(){
+  const n = document.getElementById('editcmd-prod').value;
+  const ex = editCmd.items.find(x=>x.n===n);
+  if (ex) ex.q++; else editCmd.items.push({ n, q:1 });
+  renderEditCmd();
+}
+function guardarEdicionCmd(){
+  const c = comandas.find(x=>x.id===editCmd.id); if (!c) return;
+  const motivo = document.getElementById('editcmd-motivo').value.trim();
+  if (!motivo){ snack('⚠️ Indicá el motivo del cambio — queda en el historial'); return; }
+  const names = [...new Set([...c.items.map(x=>x.n), ...editCmd.items.map(x=>x.n)])];
+  const deltaDe = n => (editCmd.items.find(x=>x.n===n)?.q||0) - (c.items.find(x=>x.n===n)?.q||0);
+  // validar stock de lo que se agrega
+  for (const n of names){
+    const d = deltaDe(n);
+    if (d>0){ const p = findProd(n); const disp = p ? (isPromo(p)?promoStock(p):p.s) : null;
+      if (disp!==null && disp<d){ snack('Sin stock de '+n); return; } }
+  }
+  const cambios = [];
+  for (const n of names){
+    const d = deltaDe(n); if (!d) continue;
+    ajustarStock(n, d);
+    const it = c.src.find(x=>x.n===n);
+    if (d>0){
+      if (it){ it.q += d; it.env = (it.env||0)+d; }
+      else { const p = findProd(n); c.src.push({ n, p:p?p.p:0, q:d, env:d, ent:0 }); }
+    } else {
+      if (it){ it.q += d; it.env = Math.max(0,(it.env||0)+d); it.ent = Math.min(it.ent||0, it.env);
+        if (it.q<=0) c.src.splice(c.src.indexOf(it),1); }
+    }
+    cambios.push((d>0?'+':'')+d+'× '+n);
+  }
+  if (!editCmd.items.length) c.estado = 'cancelada';
+  else c.items = editCmd.items.map(x=>({...x}));
+  historial.push({ ts:Date.now(), h:horaHM(Date.now()), tipo:'edicion', ref:c, detalle:cambios.join(' · ')||'sin cambios de ítems', motivo });
+  cerrar('d-editcmd');
+  renderComandas(); badgeComandas(); renderAll(); renderTablaProd(); renderHistorial(); renderCajero();
+  if (ctx && document.getElementById('d-cuenta').classList.contains('open')){ renderItemsCuenta(); renderAccionesCuenta(); }
+  snack('✏️ Comanda #'+c.id+(c.estado==='cancelada'?' cancelada':' editada')+' — '+(cambios.join(', ')||'sin cambios')+' · motivo: '+motivo);
+}
+
+/* ============================================================
+   HISTORIAL — todos los pedidos y cobros, con filtros
+   ============================================================ */
+let filtroHist = 'todo';
+function setFiltroHist(el){ selChip(el); filtroHist = el.dataset.f; renderHistorial(); }
+function renderHistorial(){
+  const cont = document.getElementById('hist-lista'); if (!cont) return;
+  const q = (document.getElementById('hist-buscar')?.value || '').trim().toLowerCase();
+  let rows = [...historial].sort((a,b)=>b.ts-a.ts).filter(e=>
+    filtroHist==='todo' ? true :
+    filtroHist==='cambios' ? (e.tipo==='edicion' || e.tipo==='precierre') :
+    e.tipo===filtroHist);
+  if (q) rows = rows.filter(e=>{
+    const t = (e.tipo==='comanda'||e.tipo==='edicion') ? e.ref.label+' '+e.ref.cliente+' '+e.ref.items.map(x=>x.n).join(' ') : (e.detalle||'');
+    return t.toLowerCase().includes(q);
+  });
+  cont.innerHTML = rows.map(e=>{
+    if (e.tipo==='comanda'){
+      const c = e.ref;
+      const badge = c.estado==='lista' ? '<span class="badge ok">✓ Entregada</span>'
+        : c.estado==='cancelada' ? '<span class="badge err">✕ Cancelada</span>'
+        : '<span class="badge warn">⏳ Pendiente</span>';
+      return `<div class="fila"><span>🧾 <b>${e.h}</b> · Comanda #${c.id} — ${c.label} · ${c.cliente}<br>
+        <span style="font-size:12px;color:var(--on-surface-variant)">${c.items.map(x=>x.q+'× '+x.n).join(' · ')||'—'}${c.coment?' · 💬 '+c.coment:''}</span></span>
+        ${badge}</div>`;
+    }
+    if (e.tipo==='edicion'){
+      const c = e.ref;
+      return `<div class="fila"><span>✏️ <b>${e.h}</b> · Comanda #${c.id} editada — ${c.label} · ${c.cliente}<br>
+        <span style="font-size:12px;color:var(--on-surface-variant)">${e.detalle} · motivo: ${e.motivo}</span></span>
+        <span class="badge warn">Editada</span></div>`;
+    }
+    if (e.tipo==='precierre'){
+      if (e.reabierto) return `<div class="fila"><span>↩ <b>${e.h}</b> · Cuenta reabierta — ${e.detalle}</span><span class="badge warn">Reabierta</span></div>`;
+      return `<div class="fila"><span>📤 <b>${e.h}</b> · Pre-cierre — ${e.detalle}<br>
+        <span style="font-size:12px;color:var(--on-surface-variant)">enviado a caja</span></span>
+        <span class="money">${fmt(e.monto)}</span></div>`;
+    }
+    return `<div class="fila"><span>💰 <b>${e.h}</b> · ${e.detalle}<br>
+      <span style="font-size:12px;color:var(--on-surface-variant)">${e.medio}</span></span>
+      <span class="money">${fmt(e.monto)}</span></div>`;
+  }).join('') || '<div class="fila"><span style="color:var(--on-surface-variant)">Sin movimientos para este filtro</span></div>';
+}
+
+/* ============================================================
+   PASAR / MOVER MESA — mueve los datos de verdad
+   ============================================================ */
+function abrirPasar(tipo, id){
+  pasarCtx = { tipo, id };
+  const libres = Object.keys(mesas).filter(k=>mesas[k].estado==='libre');
+  if (!libres.length){ snack('No hay mesas de pool libres'); return; }
+  document.getElementById('pasar-titulo').textContent = tipo==='pool' ? 'Mover a otra mesa de pool' : 'Pasar a mesa de pool';
+  document.getElementById('pasar-sub').textContent =
+    tipo==='salon' ? `Salón S${id} — ${salon[id].cliente} · consumos: ${fmt(sumItems(salon[id].items))}` :
+    tipo==='mostrador' ? `Mostrador — ${mostrador[id].cliente} · consumos: ${fmt(sumItems(mostrador[id].items))}` :
+    `Pool ${id} — ${mesas[id].jugador} · el cronómetro sigue corriendo`;
+  const dest = document.getElementById('pasar-destinos');
+  dest.innerHTML = '';
+  libres.forEach((k,ix)=>{
+    const b = document.createElement('button');
+    b.className = 'chip' + (ix===0?' sel':''); b.dataset.target = k; b.textContent = 'Pool '+k;
+    b.onclick = ()=>selChip(b);
+    dest.appendChild(b);
+  });
+  document.getElementById('pasar-vinculo').style.display = tipo==='salon' ? '' : 'none';
+  cerrar('d-cuenta');
+  abrir('d-pasar');
+}
+function confirmarPasar(){
+  const target = +document.querySelector('#pasar-destinos .chip.sel')?.dataset.target;
+  if (!target){ snack('Elegí una mesa destino'); return; }
+  if (pasarCtx.tipo === 'salon'){
+    const vincular = document.querySelector('#pasar-vinculo-chips .chip.sel')?.dataset.v === '1';
+    const s = salon[pasarCtx.id];
+    mesas[target] = { estado:'ocupada', jugador:s.cliente, pers:s.pers, inicio:Date.now(), limite:null, items:s.items, vinculo: vincular ? pasarCtx.id : null };
+    salon[pasarCtx.id] = vincular ? { estado:'vinculada', cliente:s.cliente, pool:target } : { estado:'libre' };
+    snack(`✅ Cuenta de S${pasarCtx.id} transferida a Pool ${target}` + (vincular ? ' — S'+pasarCtx.id+' queda vinculada 🔗' : ' — S'+pasarCtx.id+' libre'));
+  } else if (pasarCtx.tipo === 'mostrador'){
+    const t = mostrador[pasarCtx.id];
+    mesas[target] = { estado:'ocupada', jugador:t.cliente, inicio:Date.now(), limite:null, items:t.items };
+    delete mostrador[pasarCtx.id];
+    snack(`✅ Cuenta de ${t.cliente} transferida del mostrador a Pool ${target}`);
+  } else {
+    const m = mesas[pasarCtx.id];
+    mesas[target] = { ...m };
+    mesas[pasarCtx.id] = { estado:'libre' };
+    if (m.vinculo) salon[m.vinculo].pool = target;
+    snack(`✅ Cuenta movida de Pool ${pasarCtx.id} a Pool ${target} — el tiempo sigue corriendo`);
+  }
+  cerrar('d-pasar'); renderAll();
+}
+
+/* ============================================================
+   COBRO — calculado en vivo: descuento, recargo, redondeo
+   ============================================================ */
+function abrirCobro(){
+  const items = getItems();
+  if (ctx.tipo==='venta' && !items.length){ snack('El carrito está vacío'); return; }
+  let tiempoMin = 0, titulo = '', sub = '';
+  if (ctx.tipo === 'pool'){
+    const m = mesas[ctx.id];
+    tiempoMin = Math.floor(((m.fin||Date.now())-m.inicio)/min);
+    titulo = `Cobro — Pool ${ctx.id} · ${m.jugador}`;
+    sub = `${horaHM(m.inicio)} → ${horaHM(m.fin||Date.now())}` + (m.fin ? ' ❄️ tiempo congelado en el pre-cierre' : '') + (m.vinculo ? ` · incluye consumos de Salón S${m.vinculo}` : '');
+  } else if (ctx.tipo === 'salon'){
+    titulo = `Cobro — Salón S${ctx.id} · ${salon[ctx.id].cliente}`; sub = 'Solo consumos · sin tiempo';
+  } else if (ctx.tipo === 'mostrador'){
+    titulo = `Cobro — Mostrador · ${mostrador[ctx.id].cliente}`; sub = `Cuenta abierta ${mostrador[ctx.id].desde}`;
+  } else { titulo = 'Cobro — Venta rápida'; sub = 'Mostrador · sin mesa'; }
+  cobro = { tiempoMin, items:[...items.map(x=>({...x}))], desc:0, medio:'Efectivo', titulo, sub };
+  document.getElementById('cobro-titulo').textContent = titulo;
+  document.getElementById('cobro-sub').textContent = sub;
+  document.getElementById('propina').value = '';
+  // reset chips
+  document.querySelectorAll('#d-cobro .chiprow').forEach(row=>{ [...row.children].forEach((c,i)=>c.classList.toggle('sel', i===0)); });
+  renderDesglose();
+  cerrar('d-cuenta');
+  abrir('d-cobro');
+}
+function setDesc(d, el){ selChip(el); cobro.desc = d; renderDesglose(); }
+function setMedio(m, el){ selChip(el); cobro.medio = m; renderDesglose(); }
+function calcCobro(){
+  const tiempoImp = cobro.tiempoMin * TARIFA_MIN;
+  const cons = sumItems(cobro.items);
+  const sub = tiempoImp + cons;
+  const descM = sub * cobro.desc / 100;
+  const recPct = RECARGOS[cobro.medio];
+  const recM = (sub - descM) * recPct / 100;
+  const antes = sub - descM + recM;
+  const total = r100(antes);
+  return { tiempoImp, cons, sub, descM, recPct, recM, redondeo: total-antes, total };
+}
+function renderDesglose(){
+  const c = calcCobro();
+  let html = '';
+  if (cobro.tiempoMin) html += `<div class="fila"><span>⏱️ Tiempo ${cobro.tiempoMin} min × ${fmt(TARIFA_MIN)}</span><span>${fmt(c.tiempoImp)}</span></div>`;
+  cobro.items.forEach(it=>{ html += `<div class="fila"><span>${it.q} × ${it.n}</span><span>${fmt(it.p*it.q)}</span></div>`; });
+  if (cobro.desc) html += `<div class="fila"><span>Descuento ${cobro.desc}%</span><span class="neg">− ${fmt(c.descM)}</span></div>`;
+  if (c.recPct) html += `<div class="fila"><span>Recargo ${cobro.medio} ${c.recPct}%</span><span>+ ${fmt(c.recM)}</span></div>`;
+  if (REDONDEO) html += `<div class="fila"><span>Redondeo a $${REDONDEO}</span><span>${c.redondeo>=0?'+':'−'} ${fmt(Math.abs(c.redondeo))}</span></div>`;
+  html += `<div class="fila"><span><b>TOTAL A PAGAR</b></span><span class="total">${fmt(c.total)}</span></div>`;
+  document.getElementById('cobro-desglose').innerHTML = html;
+  document.getElementById('cobro-confirmar').textContent = 'Cobrar ' + fmt(c.total) + ' (' + cobro.medio + ')';
+}
+function confirmarCobro(){
+  const c = calcCobro();
+  const prop = +document.getElementById('propina').value || 0;
+  // ticket dinámico
+  let lines = '';
+  if (cobro.tiempoMin) lines += `<div class="tr"><span>Tiempo ${cobro.tiempoMin} min</span><span>${fmt(c.tiempoImp)}</span></div>`;
+  cobro.items.forEach(it=>{ lines += `<div class="tr"><span>${it.q}x ${it.n}</span><span>${fmt(it.p*it.q)}</span></div>`; });
+  if (cobro.desc) lines += `<div class="tr"><span>Desc. ${cobro.desc}%</span><span>-${fmt(c.descM)}</span></div>`;
+  if (c.recPct) lines += `<div class="tr"><span>Recargo ${cobro.medio} ${c.recPct}%</span><span>+${fmt(c.recM)}</span></div>`;
+  lines += `<div class="tr"><span>Redondeo</span><span>${c.redondeo>=0?'+':'-'}${fmt(Math.abs(c.redondeo))}</span></div>`;
+  document.getElementById('ticket-body').innerHTML = `
+    <div class="c"><b>SALÓN DE POOL</b><br>Comprobante no fiscal</div><hr>
+    <div class="tr"><span>${new Date().toLocaleDateString('es-AR')} ${horaHM(Date.now())}</span><span>Atendió: Lucas</span></div>
+    <div class="tr"><span>${cobro.titulo.replace('Cobro — ','')}</span></div><hr>
+    ${lines}<hr>
+    <div class="tr tot"><span>TOTAL</span><span>${fmt(c.total)}</span></div>
+    <div class="tr"><span>${cobro.medio}</span><span>${fmt(c.total)}</span></div>
+    ${prop ? `<div class="tr"><span>Propina</span><span>${fmt(prop)}</span></div>` : ''}<hr>
+    <div class="c">¡Gracias por su visita! 🎱</div>`;
+  // cerrar comandas pendientes de esta cuenta y registrar el cobro en el historial
+  const itemsRef = ctx.tipo==='venta' ? null : getItems();
+  if (itemsRef) comandas.filter(cc=>cc.src===itemsRef && cc.estado==='pendiente').forEach(cc=>{ cc.estado='lista'; cc.tsListo=Date.now(); });
+  historial.push({ ts:Date.now(), h:horaHM(Date.now()), tipo:'cobro', detalle:cobro.titulo.replace('Cobro — ',''), medio:cobro.medio, monto:c.total });
+  badgeComandas();
+  // liberar mesas / vaciar carrito
+  if (ctx.tipo === 'pool'){
+    const m = mesas[ctx.id];
+    if (m.vinculo) salon[m.vinculo] = { estado:'libre' };
+    mesas[ctx.id] = { estado:'libre' };
+  } else if (ctx.tipo === 'salon'){
+    salon[ctx.id] = { estado:'libre' };
+  } else if (ctx.tipo === 'mostrador'){
+    delete mostrador[ctx.id];
+  } else ventaCart = [];
+  if (turno.abierto) turno.movs.push({ h:horaHM(Date.now()), tipo:ctx.tipo, detalle:cobro.titulo.replace('Cobro — ',''), medio:cobro.medio, monto:c.total, prop });
+  renderAll(); renderTurno(); renderCajero(); badgeCajero();
+  cerrar('d-cobro');
+  abrir('d-ticket');
+  snack('💰 Cobrado ' + fmt(c.total) + ' (' + cobro.medio + ')' + (prop ? ' · propina ' + fmt(prop) : '') + ' — registrado en el turno');
+}
+
+/* ============================================================
+   MI TURNO — calculado de los movimientos reales del boceto
+   ============================================================ */
+const MEDIOS = ['Efectivo','MercadoPago','Débito','Crédito','Transferencia'];
+function efectivoEsperado(){
+  const cobros = turno.movs.filter(m=>m.medio==='Efectivo').reduce((a,m)=>a+m.monto,0);
+  const caja = turno.cajaMovs.reduce((a,m)=>a+m.dir*m.monto,0);
+  return turno.efectivoInicial + cobros + caja;
+}
+function renderTurno(){
+  const sub = document.getElementById('turno-sub'), body = document.getElementById('turno-body');
+  if (!sub) return;
+  if (rol === 'mozo'){
+    /* vista del mozo: su operación, sin caja ni arqueo (la caja es del cajero) */
+    const cmds = historial.filter(e=>e.tipo==='comanda');
+    const itemsEnv = cmds.reduce((a,e)=>a+e.ref.items.reduce((x,y)=>x+y.q,0),0);
+    const pres = historial.filter(e=>e.tipo==='precierre' && !e.reabierto).length;
+    const act = Object.values(mesas).filter(x=>x.estado!=='libre').length + Object.values(salon).filter(x=>x.estado!=='libre').length;
+    sub.innerHTML = `<b>${turno.empleado}</b> · turno abierto ${horaHM(turno.inicio)} · operación de salón — la caja la maneja el cajero`;
+    body.innerHTML = `
+      <div class="kpi-row">
+        <div class="kpi destacado"><div class="l">Comandas enviadas</div><div class="v">${cmds.length}</div></div>
+        <div class="kpi"><div class="l">Ítems comandados</div><div class="v">${itemsEnv}</div></div>
+        <div class="kpi"><div class="l">Pre-cierres enviados</div><div class="v">${pres}</div></div>
+        <div class="kpi"><div class="l">Mesas activas ahora</div><div class="v">${act}</div></div>
+      </div>
+      <div class="card">
+        <h3 style="font-weight:500;margin-bottom:8px">Últimas comandas</h3>
+        <div class="lista" style="max-height:300px;overflow-y:auto">${[...cmds].reverse().slice(0,8).map(e=>
+          `<div class="fila"><span>${e.h} · ${e.ref.label} · ${e.ref.cliente}<br><span style="font-size:11px;color:var(--on-surface-variant)">${e.ref.items.map(x=>x.q+'× '+x.n).join(' · ')}</span></span><span class="badge ${e.ref.estado==='lista'?'ok':e.ref.estado==='cancelada'?'err':'warn'}">${e.ref.estado==='lista'?'✓':e.ref.estado==='cancelada'?'✕':'⏳'}</span></div>`).join('')
+          || '<div class="fila"><span style="color:var(--on-surface-variant)">Sin comandas todavía</span></div>'}</div>
+      </div>`;
+    return;
+  }
+  if (!turno.abierto){
+    sub.textContent = 'No hay turno abierto';
+    body.innerHTML = `<div class="card filled" style="text-align:center;padding:34px">
+      <div style="font-size:34px;line-height:1">🔒</div>
+      <h3 style="font-weight:500;margin:10px 0 4px">Turno cerrado</h3>
+      <div style="font-size:13px;color:var(--on-surface-variant);margin-bottom:18px">Para operar el salón hay que abrir un turno nuevo</div>
+      <button class="btn filled" onclick="abrir('d-abrirturno')">Abrir turno</button></div>`;
+    return;
+  }
+  const tot = turno.movs.reduce((a,m)=>a+m.monto,0);
+  const props = turno.movs.reduce((a,m)=>a+(m.prop||0),0);
+  const sesiones = turno.movs.filter(m=>m.tipo==='pool'||m.tipo==='salon').length;
+  const ventas = turno.movs.filter(m=>m.tipo==='venta'||m.tipo==='mostrador').length;
+  sub.innerHTML = `<b>${turno.empleado}</b> · abierto ${horaHM(turno.inicio)} · efectivo inicial ${fmt(turno.efectivoInicial)}`;
+  const porMedio = MEDIOS.map(md=>[md, turno.movs.filter(m=>m.medio===md).reduce((a,m)=>a+m.monto,0)]).filter(x=>x[1]>0);
+  const max = Math.max(...porMedio.map(x=>x[1]), 1);
+  const movsHtml = [...turno.movs].reverse().map(m=>
+    `<div class="fila"><span>${m.h} · ${m.detalle}<br><span style="font-size:11px;color:var(--on-surface-variant)">${m.medio}${m.prop?' · propina '+fmt(m.prop):''}</span></span><span class="money">${fmt(m.monto)}</span></div>`).join('')
+    || '<div class="fila"><span style="color:var(--on-surface-variant)">Sin movimientos todavía</span></div>';
+  const cajaHtml = turno.cajaMovs.map(m=>
+    `<div class="fila"><span>${m.h} · ${m.motivo}</span><span class="${m.dir<0?'neg':'money'}">${m.dir<0?'− ':'+ '}${fmt(m.monto)}</span></div>`).join('');
+  body.innerHTML = `
+    <div class="kpi-row">
+      <div class="kpi"><div class="l">Sesiones de mesa</div><div class="v">${sesiones}</div></div>
+      <div class="kpi"><div class="l">Ventas rápidas</div><div class="v">${ventas}</div></div>
+      <div class="kpi destacado"><div class="l">Cobrado en el turno</div><div class="v">${fmt(tot)}</div></div>
+      <div class="kpi"><div class="l">Propinas</div><div class="v">${fmt(props)}</div></div>
+      <div class="kpi"><div class="l">Efectivo esperado en caja</div><div class="v">${fmt(efectivoEsperado())}</div></div>
+    </div>
+    <div class="cols2">
+      <div class="card">
+        <h3 style="font-weight:500;margin-bottom:8px">Cobrado por medio de pago</h3>
+        <div class="barras">${porMedio.map(([md,v])=>`<div class="fila-barra"><span>${md}</span><div class="barra"><div style="width:${Math.round(v/max*100)}%"></div></div><span class="money">${fmt(v)}</span></div>`).join('') || '<div style="font-size:13px;color:var(--on-surface-variant)">Sin cobros todavía</div>'}</div>
+        ${cajaHtml ? `<h3 style="font-weight:500;margin:14px 0 8px">Caja — retiros e ingresos</h3><div class="lista">${cajaHtml}</div>` : ''}
+      </div>
+      <div class="card">
+        <h3 style="font-weight:500;margin-bottom:8px">Movimientos del turno</h3>
+        <div class="lista" style="max-height:300px;overflow-y:auto">${movsHtml}</div>
+      </div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+      <button class="btn tonal" onclick="abrir('d-caja')">💵 Retiro / ingreso de caja</button>
+      <button class="btn filled" onclick="abrirCierre()">Cerrar turno y arquear caja</button>
+    </div>`;
+}
+function confirmarCaja(){
+  const monto = +document.getElementById('caja-monto').value || 0;
+  if (!monto){ snack('Ingresá un monto'); return; }
+  const dir = +document.querySelector('#caja-tipo .chip.sel').dataset.t;
+  const motivo = document.getElementById('caja-motivo').value.trim() || (dir<0?'retiro':'ingreso');
+  turno.cajaMovs.push({ h:horaHM(Date.now()), dir, monto, motivo });
+  cerrar('d-caja'); renderTurno();
+  snack((dir<0?'💸 Retiro':'💵 Ingreso')+' de '+fmt(monto)+' registrado');
+}
+function abrirCierre(){
+  const cobros = turno.movs.filter(m=>m.medio==='Efectivo').reduce((a,m)=>a+m.monto,0);
+  const ret = turno.cajaMovs.filter(m=>m.dir<0).reduce((a,m)=>a+m.monto,0);
+  const ing = turno.cajaMovs.filter(m=>m.dir>0).reduce((a,m)=>a+m.monto,0);
+  const tot = turno.movs.reduce((a,m)=>a+m.monto,0);
+  const props = turno.movs.reduce((a,m)=>a+(m.prop||0),0);
+  const porMedio = MEDIOS.map(md=>[md, turno.movs.filter(m=>m.medio===md).reduce((a,m)=>a+m.monto,0), turno.movs.filter(m=>m.medio===md).length]).filter(x=>x[1]>0);
+  document.getElementById('cierre-titulo').textContent = 'Cierre de turno — ' + turno.empleado;
+  document.getElementById('cierre-detalle').innerHTML = `
+    <div class="fila"><span style="font-size:11px;letter-spacing:1px;color:var(--on-surface-variant)">COBRADO POR MEDIO DE PAGO</span><span></span></div>
+    ${porMedio.map(([md,v,n])=>`<div class="fila"><span>${md} <span style="font-size:11px;color:var(--on-surface-variant)">(${n} cobro${n>1?'s':''})</span></span><span class="money">${fmt(v)}</span></div>`).join('') || '<div class="fila"><span style="color:var(--on-surface-variant)">Sin cobros en el turno</span></div>'}
+    <div class="fila"><span><b>Total cobrado</b></span><span class="money"><b>${fmt(tot)}</b></span></div>
+    ${props?`<div class="fila"><span>Propinas (aparte)</span><span>${fmt(props)}</span></div>`:''}
+    <div class="fila" style="padding-top:14px"><span style="font-size:11px;letter-spacing:1px;color:var(--on-surface-variant)">ARQUEO DE EFECTIVO</span><span></span></div>
+    <div class="fila"><span>Efectivo inicial</span><span>${fmt(turno.efectivoInicial)}</span></div>
+    <div class="fila"><span>+ Cobros en efectivo</span><span class="money">${fmt(cobros)}</span></div>
+    ${ing?`<div class="fila"><span>+ Ingresos de caja</span><span class="money">${fmt(ing)}</span></div>`:''}
+    ${ret?`<div class="fila"><span>− Retiros de caja</span><span class="neg">− ${fmt(ret)}</span></div>`:''}
+    <div class="fila"><span><b>Efectivo esperado</b></span><span class="money"><b>${fmt(efectivoEsperado())}</b></span></div>`;
+  document.getElementById('declarado').value = efectivoEsperado();
+  calcDif();
+  abrir('d-cierre');
+}
+function confirmarCierre(){
+  turno.abierto = false;
+  cerrar('d-cierre'); renderTurno();
+  snack('🔒 Turno de '+turno.empleado+' cerrado e inmutable — resumen enviado al admin');
+}
+function confirmarTurnoNuevo(){
+  turno = { abierto:true, empleado:document.getElementById('at-emp').value, inicio:Date.now(),
+            efectivoInicial:+document.getElementById('at-inicial').value || 0, movs:[], cajaMovs:[] };
+  cerrar('d-abrirturno'); renderTurno();
+  snack('✅ Turno de '+turno.empleado+' abierto');
+}
+
+/* ============================================================
+   PRODUCTOS — catálogo editable, compras reales, filtros
+   ============================================================ */
+let filtroProd = 'Todos', prodEdit = -1;
+const bajoMin = p => p.s !== null && p.smin && p.s < p.smin;
+
+function setFiltroProd(el){ selChip(el); filtroProd = el.dataset.f; renderTablaProd(); }
+
+function renderTablaProd(){
+  const tb = document.getElementById('tabla-prod'); if (!tb) return;
+  const q = (document.getElementById('prod-buscar')?.value || '').trim().toLowerCase();
+  const lista = productos.map((p,i)=>[p,i]).filter(([p])=>{
+    if (q && !p.n.toLowerCase().includes(q)) return false;
+    if (filtroProd === 'Bajo') return bajoMin(p);
+    if (filtroProd !== 'Todos') return p.c === filtroProd;
+    return true;
+  });
+  tb.innerHTML = lista.map(([p,i])=>{
+    const promo = isPromo(p);
+    const costo = promo ? promoCost(p) : p.cost;
+    const disp = promo ? promoStock(p) : p.s;
+    let estado = '<span class="badge ok">OK</span>';
+    if (promo) estado = (disp !== null && disp <= 0) ? '<span class="badge err">Sin stock</span>' : '<span class="badge ok">🎁 Promo</span>';
+    else if (p.s === null) estado = '<span class="badge ok">Preparado</span>';
+    else if (p.smin && p.s <= Math.max(2, p.smin*0.3)) estado = `<span class="badge err">Crítico</span>`;
+    else if (bajoMin(p)) estado = `<span class="badge warn">Bajo mínimo</span>`;
+    const margen = p.p && costo ? Math.round((1 - costo/p.p)*100) + '%' : '—';
+    return `<tr style="cursor:pointer" onclick="abrirProducto(${i})"><td>${p.n}</td><td>${p.c}</td><td class="r money">${fmt(p.p)}</td><td class="r">${costo?fmt(costo):'—'}</td><td class="r">${margen}</td><td class="r">${disp===null?'—':disp}</td><td class="r">${p.smin||'—'}</td><td>${estado}</td></tr>`;
+  }).join('') || `<tr><td colspan="8" style="color:var(--on-surface-variant)">Sin productos para este filtro</td></tr>`;
+  const k = document.getElementById('prod-kpis');
+  if (k){
+    const bajo = productos.filter(bajoMin).length;
+    const inv = productos.reduce((a,p)=>a + (p.s||0)*(p.cost||0), 0);
+    k.innerHTML = `
+      <div class="kpi"><div class="l">Productos</div><div class="v">${productos.length}</div></div>
+      <div class="kpi ${bajo?'':''}"><div class="l">Bajo mínimo</div><div class="v" style="${bajo?'color:var(--warn)':''}">${bajo}</div></div>
+      <div class="kpi"><div class="l">Inventario a costo</div><div class="v">${fmt(inv)}</div></div>`;
+  }
+}
+
+/* alta / edición (con armado de combos para Promos) */
+let comboTmp = [];
+function abrirProducto(i){
+  prodEdit = i;
+  const p = i >= 0 ? productos[i] : null;
+  document.getElementById('producto-titulo').textContent = p ? 'Editar producto' : 'Nuevo producto';
+  document.getElementById('producto-eliminar').style.display = p ? '' : 'none';
+  document.getElementById('prod-nombre').value = p ? p.n : '';
+  document.getElementById('prod-cat').value = p ? p.c : 'Bebidas';
+  document.getElementById('prod-precio').value = p ? p.p : '';
+  document.getElementById('prod-costo').value = p && p.cost ? p.cost : '';
+  document.getElementById('prod-stock').value = p && p.s !== null ? p.s : '';
+  document.getElementById('prod-smin').value = p && p.smin ? p.smin : '';
+  comboTmp = p && p.combo ? p.combo.map(c=>({...c})) : [];
+  toggleComboUI();
+  abrir('d-producto');
+  setTimeout(()=>document.getElementById('prod-nombre').focus(), 80);
+}
+function toggleComboUI(){
+  const esPromo = document.getElementById('prod-cat').value === 'Promos';
+  document.getElementById('prod-normal').style.display = esPromo ? 'none' : '';
+  document.getElementById('prod-combo').style.display = esPromo ? '' : 'none';
+  if (esPromo){ if (!comboTmp.length) comboTmp = [{ n: productos.find(x=>!isPromo(x))?.n, q: 1 }]; renderCombo(); }
+}
+function renderCombo(){
+  const opciones = productos.filter(x=>!isPromo(x)).map(x=>`<option>${x.n}</option>`).join('');
+  document.getElementById('combo-lista').innerHTML = comboTmp.map((cm,i)=>`
+    <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
+      <select style="flex:1;background:var(--surface-container);border:1px solid var(--outline);border-radius:6px;padding:9px;color:var(--on-surface)" onchange="comboTmp[${i}].n=this.value;resumenCombo()">${opciones.replace(`<option>${cm.n}</option>`,`<option selected>${cm.n}</option>`)}</select>
+      <input type="number" min="1" value="${cm.q}" style="width:64px;background:var(--surface-container);border:1px solid var(--outline);border-radius:6px;padding:9px;color:var(--on-surface)" oninput="comboTmp[${i}].q=+this.value||1;resumenCombo()">
+      <button class="step" onclick="comboTmp.splice(${i},1);renderCombo()">✕</button>
+    </div>`).join('');
+  resumenCombo();
+}
+function agregarComponente(){
+  comboTmp.push({ n: productos.find(x=>!isPromo(x))?.n, q: 1 });
+  renderCombo();
+}
+function resumenCombo(){
+  const el = document.getElementById('combo-resumen');
+  if (document.getElementById('prod-cat').value !== 'Promos'){ el.innerHTML=''; return; }
+  const fake = { combo: comboTmp };
+  const costo = promoCost(fake), disp = promoStock(fake);
+  const precio = +document.getElementById('prod-precio').value || 0;
+  const margen = precio && costo ? Math.round((1 - costo/precio)*100) + '%' : '—';
+  el.innerHTML = `
+    <div class="fila"><span>Costo del combo (componentes)</span><span>${fmt(costo)}</span></div>
+    <div class="fila"><span>Margen con este precio</span><span class="money">${margen}</span></div>
+    <div class="fila"><span>Se pueden armar hoy</span><span>${disp===null?'∞':disp}</span></div>`;
+}
+function guardarProducto(){
+  const n = document.getElementById('prod-nombre').value.trim();
+  const precio = +document.getElementById('prod-precio').value || 0;
+  const cat = document.getElementById('prod-cat').value;
+  if (!n || !precio){ snack('Completá nombre y precio de venta'); return; }
+  let obj;
+  if (cat === 'Promos'){
+    const combo = comboTmp.filter(c=>c.n && c.q>0);
+    if (!combo.length){ snack('Agregá al menos un componente al combo'); return; }
+    obj = { n, c:cat, p:precio, cost:0, s:null, smin:0, combo, v: prodEdit>=0 ? productos[prodEdit].v : 0 };
+  } else {
+    const stockTxt = document.getElementById('prod-stock').value;
+    obj = {
+      n, c:cat, p:precio,
+      cost: +document.getElementById('prod-costo').value || 0,
+      s: stockTxt === '' ? null : +stockTxt,
+      smin: +document.getElementById('prod-smin').value || 0,
+      v: prodEdit >= 0 ? productos[prodEdit].v : 0,
+    };
+  }
+  if (prodEdit >= 0) productos[prodEdit] = obj; else productos.push(obj);
+  cerrar('d-producto'); renderTablaProd();
+  snack('✅ '+(cat==='Promos'?'Promo':'Producto')+' "'+n+'" guardado');
+}
+function eliminarProducto(){
+  const p = productos[prodEdit];
+  if (!confirm('¿Eliminar "'+p.n+'" del catálogo?')) return;
+  productos.splice(prodEdit, 1);
+  cerrar('d-producto'); renderTablaProd();
+  snack('🗑️ "'+p.n+'" eliminado');
+}
+
+/* compras */
+function abrirCompra(){
+  const sel = document.getElementById('compra-prod');
+  sel.innerHTML = productos.map((p,i)=>p.s===null?'':`<option value="${i}">${p.n} (stock ${p.s})</option>`).join('');
+  precargarCostoCompra();
+  abrir('d-compra');
+}
+function precargarCostoCompra(){
+  const p = productos[+document.getElementById('compra-prod').value];
+  if (p) document.getElementById('compra-costo').value = p.cost || '';
+  calcCompra();
+}
+function calcCompra(){
+  const cant = +document.getElementById('compra-cant').value || 0;
+  const costo = +document.getElementById('compra-costo').value || 0;
+  document.getElementById('compra-total').textContent = fmt(cant*costo);
+}
+function confirmarCompra(){
+  const p = productos[+document.getElementById('compra-prod').value];
+  const cant = +document.getElementById('compra-cant').value || 0;
+  const costo = +document.getElementById('compra-costo').value || 0;
+  if (!p || !cant || !costo){ snack('Completá cantidad y costo'); return; }
+  const antes = p.s;
+  p.s += cant; p.cost = costo;
+  cerrar('d-compra'); renderTablaProd();
+  snack(`📦 ${p.n}: stock ${antes} → ${p.s} · costo actualizado a ${fmt(costo)} · egreso ${fmt(cant*costo)} (${document.getElementById('compra-medio').value})`);
+}
+
+/* ============================================================
+   GASTOS — registro editable, fijos vs. variables, por mes
+   ============================================================ */
+const CATS_GASTO = ['Alquiler','Servicios','Sueldos','Mantenimiento','Impuestos','Otros'];
+const VENTAS_MES = { '2026-06': 1849700, '2026-05': 4150000 }; // para % gastos/ventas (junio parcial)
+let gastos = [
+  { f:'2026-06-01', cat:'Alquiler',      det:'Alquiler junio',          medio:'Transferencia', monto:450000, fijo:true },
+  { f:'2026-06-03', cat:'Servicios',     det:'Luz — Edesur',            medio:'Débito',        monto:86000,  fijo:true },
+  { f:'2026-06-05', cat:'Sueldos',       det:'Adelanto Sofía',          medio:'Efectivo',      monto:120000, fijo:false },
+  { f:'2026-06-07', cat:'Mantenimiento', det:'Cambio de paño Mesa 4',   medio:'Efectivo',      monto:95000,  fijo:false },
+  { f:'2026-06-08', cat:'Servicios',     det:'Internet',                medio:'Débito',        monto:32000,  fijo:true },
+  { f:'2026-06-09', cat:'Impuestos',     det:'Monotributo',             medio:'Transferencia', monto:130000, fijo:true },
+  { f:'2026-05-01', cat:'Alquiler',      det:'Alquiler mayo',           medio:'Transferencia', monto:450000, fijo:true },
+  { f:'2026-05-03', cat:'Servicios',     det:'Luz — Edesur',            medio:'Débito',        monto:78000,  fijo:true },
+  { f:'2026-05-08', cat:'Servicios',     det:'Internet',                medio:'Débito',        monto:32000,  fijo:true },
+  { f:'2026-05-15', cat:'Otros',         det:'Reposición tacos y tizas',medio:'Efectivo',      monto:60000,  fijo:false },
+  { f:'2026-05-28', cat:'Sueldos',       det:'Sueldos mayo',            medio:'Efectivo',      monto:250000, fijo:false },
+];
+let mesGasto = '2026-06', catGasto = 'Todas', gastoEdit = -1;
+const fmtFecha = f => f.slice(8,10) + '/' + f.slice(5,7);
+const mesAnteriorDe = m => { const [y,mm] = m.split('-').map(Number); const d = new Date(y, mm-2, 1); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); };
+
+function setMesGasto(el){ selChip(el); mesGasto = el.dataset.m; renderGastos(); }
+function setCatGasto(el){ selChip(el); catGasto = el.dataset.c; renderGastos(); }
+
+function renderGastos(){
+  const kg = document.getElementById('gastos-kpis'); if (!kg) return;
+  const delMes = gastos.map((g,i)=>[g,i]).filter(([g])=>g.f.startsWith(mesGasto));
+  const tot = delMes.reduce((a,[g])=>a+g.monto,0);
+  const fijos = delMes.filter(([g])=>g.fijo).reduce((a,[g])=>a+g.monto,0);
+  const prev = gastos.filter(g=>g.f.startsWith(mesAnteriorDe(mesGasto))).reduce((a,g)=>a+g.monto,0);
+  const dif = prev ? Math.round((tot-prev)/prev*100) : null;
+  const ventas = VENTAS_MES[mesGasto];
+  const ratio = ventas ? Math.round(tot/ventas*100) : null;
+  const porCat = CATS_GASTO.map(c=>[c, delMes.filter(([g])=>g.cat===c).reduce((a,[g])=>a+g.monto,0)]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]);
+  const mayor = porCat[0] || ['—',0];
+  kg.innerHTML = `
+    <div class="kpi"><div class="l">Gastos del mes</div><div class="v neg">${fmt(tot)}</div></div>
+    <div class="kpi"><div class="l">📌 Fijos del mes</div><div class="v">${fmt(fijos)}</div><div class="d">${tot?Math.round(fijos/tot*100):0}% del total</div></div>
+    ${dif!==null?`<div class="kpi"><div class="l">vs. mes anterior</div><div class="v">${dif>=0?'▲':'▼'} ${Math.abs(dif)}%</div><div class="d ${dif>0?'down':'up'}">${dif>=0?'gastando más':'gastando menos'}</div></div>`:''}
+    ${ratio!==null?`<div class="kpi"><div class="l">Gastos / ventas</div><div class="v">${ratio}%</div><div class="d">del mes seleccionado</div></div>`:''}
+    <div class="kpi"><div class="l">Mayor categoría</div><div class="v">${mayor[0]}</div><div class="d">${fmt(mayor[1])}</div></div>`;
+  /* barras por categoría */
+  const maxC = Math.max(...porCat.map(x=>x[1]), 1);
+  document.getElementById('gastos-barras').innerHTML = porCat.map(([c,v])=>
+    `<div class="fila-barra"><span>${c}</span><div class="barra"><div style="width:${Math.round(v/maxC*100)}%;background:var(--error)"></div></div><span class="neg" style="font-weight:600">${fmt(v)}</span></div>`).join('')
+    || '<div style="font-size:13px;color:var(--on-surface-variant)">Sin gastos este mes</div>';
+  /* tabla filtrada */
+  const filtrados = delMes.filter(([g])=> catGasto==='Todas' ? true : (catGasto==='Fijos' ? g.fijo : g.cat===catGasto))
+    .sort((a,b)=> b[0].f.localeCompare(a[0].f));
+  const totFil = filtrados.reduce((a,[g])=>a+g.monto,0);
+  document.getElementById('tabla-gastos').innerHTML = filtrados.map(([g,i])=>
+    `<tr style="cursor:pointer" onclick="abrirGasto(${i})"><td>${fmtFecha(g.f)}</td><td>${g.cat}</td><td>${g.det}${g.fijo?' 📌':''}</td><td>${g.medio}</td><td class="r neg">${fmt(g.monto)}</td></tr>`).join('')
+    + (filtrados.length ? `<tr><td colspan="4" style="text-align:right;font-weight:700">Total del filtro</td><td class="r neg" style="font-weight:800">${fmt(totFil)}</td></tr>`
+       : '<tr><td colspan="5" style="color:var(--on-surface-variant)">Sin gastos para este filtro</td></tr>');
+}
+
+function abrirGasto(i){
+  gastoEdit = i;
+  const g = i >= 0 ? gastos[i] : null;
+  document.getElementById('gasto-titulo').textContent = g ? 'Editar gasto' : 'Registrar gasto';
+  document.getElementById('gasto-eliminar').style.display = g ? '' : 'none';
+  document.getElementById('gasto-fecha').value = g ? g.f : new Date().toISOString().slice(0,10);
+  document.getElementById('gasto-cat').value = g ? g.cat : 'Mantenimiento';
+  document.getElementById('gasto-monto').value = g ? g.monto : '';
+  document.getElementById('gasto-medio').value = g ? g.medio : 'Efectivo';
+  document.getElementById('gasto-detalle').value = g ? g.det : '';
+  [...document.querySelectorAll('#gasto-fijo .chip')].forEach(c=>c.classList.toggle('sel', c.dataset.f === ((g && g.fijo) ? '1' : '0')));
+  abrir('d-gasto');
+}
+function guardarGasto(){
+  const monto = +document.getElementById('gasto-monto').value || 0;
+  if (!monto){ snack('Ingresá el monto del gasto'); return; }
+  const obj = {
+    f: document.getElementById('gasto-fecha').value || new Date().toISOString().slice(0,10),
+    cat: document.getElementById('gasto-cat').value,
+    det: document.getElementById('gasto-detalle').value.trim() || document.getElementById('gasto-cat').value,
+    medio: document.getElementById('gasto-medio').value,
+    monto,
+    fijo: document.querySelector('#gasto-fijo .chip.sel')?.dataset.f === '1',
+  };
+  if (gastoEdit >= 0) gastos[gastoEdit] = obj; else gastos.push(obj);
+  cerrar('d-gasto'); renderGastos();
+  snack('💸 Gasto '+(gastoEdit>=0?'actualizado':'registrado')+': '+obj.det+' — '+fmt(monto)+' ('+obj.medio+')');
+}
+function eliminarGasto(){
+  const g = gastos[gastoEdit];
+  if (!confirm('¿Eliminar el gasto "'+g.det+'" de '+fmt(g.monto)+'?')) return;
+  gastos.splice(gastoEdit, 1);
+  cerrar('d-gasto'); renderGastos();
+  snack('🗑️ Gasto eliminado');
+}
+
+/* ============================================================
+   DASHBOARD — KPIs estándar POS (números del día de ejemplo,
+   ocupación y alertas en vivo)
+   ============================================================ */
+const dashData = {
+  total: 148300, vsSem: 18, cobros: 15, horasVendidas: '14,5 h', propinas: 6500,
+  tiempo: 91000, prods: 57300,
+  horas: [
+    { h:'14', t:5000,  p:3000 }, { h:'15', t:7000,  p:4000 },
+    { h:'16', t:9000,  p:5000 }, { h:'17', t:8000,  p:5000 },
+    { h:'18', t:11000, p:7000 }, { h:'19', t:13000, p:8000 },
+    { h:'20', t:16000, p:11000 },{ h:'21', t:22000, p:14300 },
+  ],
+  medios: [['Efectivo',62300],['MercadoPago',30000],['Débito',24000],['Crédito',18000],['Transferencia',14000]],
+  top: [['Cerveza Quilmes',14,63000],['Fernet + Coca',6,39000],['Promo: 2 Cervezas + Papas',3,33000],['Coca-Cola 500',8,24000]],
+};
+function renderDash(){
+  const k = document.getElementById('dash-kpis'); if (!k) return;
+  const activasPool = Object.values(mesas).filter(x=>x.estado!=='libre').length;
+  const ocupSalon = Object.values(salon).filter(x=>x.estado!=='libre').length;
+  const ocup = Math.round((activasPool+ocupSalon)/22*100);
+  const ticket = Math.round(dashData.total/dashData.cobros/100)*100;
+  k.innerHTML = `
+    <div class="kpi destacado"><div class="l">Recaudado hoy</div><div class="v">${fmt(dashData.total)}</div><div class="d up">▲ +${dashData.vsSem}% vs. mismo día sem. pasada</div></div>
+    <div class="kpi"><div class="l">Ticket promedio</div><div class="v">${fmt(ticket)}</div><div class="d">${dashData.cobros} cobros</div></div>
+    <div class="kpi"><div class="l">Horas de mesa vendidas</div><div class="v">${dashData.horasVendidas}</div><div class="d up">▲ +6%</div></div>
+    <div class="kpi"><div class="l">Ocupación ahora</div><div class="v">${ocup}%</div><div class="d">${activasPool}/12 pool · ${ocupSalon}/10 salón</div></div>
+    <div class="kpi"><div class="l">Propinas</div><div class="v">${fmt(dashData.propinas)}</div><div class="d">aparte de la recaudación</div></div>`;
+  /* ventas por hora (apilado tiempo + productos) */
+  const maxH = Math.max(...dashData.horas.map(x=>x.t+x.p));
+  const curH = String(new Date().getHours());
+  document.getElementById('dash-horas').innerHTML = dashData.horas.map(x=>`
+    <div class="hcol ${x.h===curH?'cur':''}" title="${x.h}:00 — ${fmt(x.t+x.p)} (mesas ${fmt(x.t)} · productos ${fmt(x.p)})">
+      <div class="seg-p" style="height:${x.p/maxH*100}%"></div>
+      <div class="seg-t" style="height:${x.t/maxH*100}%"></div>
+    </div>`).join('');
+  document.getElementById('dash-horas-lbl').innerHTML = dashData.horas.map(x=>`<span>${x.h}h</span>`).join('');
+  /* split tiempo / productos */
+  const pt = Math.round(dashData.tiempo/dashData.total*100);
+  document.getElementById('dash-split').innerHTML = `<div class="st" style="width:${pt}%"></div><div class="sp" style="width:${100-pt}%"></div>`;
+  document.getElementById('dash-split-leg').innerHTML =
+    `<span><i style="background:var(--primary)"></i>Tiempo de mesa ${fmt(dashData.tiempo)} (${pt}%)</span>
+     <span><i style="background:var(--tertiary)"></i>Productos ${fmt(dashData.prods)} (${100-pt}%)</span>`;
+  /* medios */
+  const maxM = Math.max(...dashData.medios.map(x=>x[1]));
+  document.getElementById('dash-medios').innerHTML = dashData.medios.map(([m,v])=>
+    `<div class="fila-barra"><span>${m}</span><div class="barra"><div style="width:${Math.round(v/maxM*100)}%"></div></div><span class="money">${fmt(v)}</span></div>`).join('');
+  /* alertas en vivo */
+  let al = '';
+  productos.filter(bajoMin).forEach(p=>{ al += `<div class="fila"><span>📦 ${p.n} — quedan ${p.s} (mín. ${p.smin})</span><span class="badge warn">Stock</span></div>`; });
+  Object.keys(mesas).forEach(i=>{ const m=mesas[i]; if (m.estado!=='libre' && esAlerta(m)) al += `<div class="fila"><span>⏰ Pool ${i} (${m.jugador}) — tiempo cumplido</span><span class="badge err">Mesa</span></div>`; });
+  al += `<div class="fila"><span>💵 Caja de ayer (Sofía): faltante $1.200</span><span class="badge warn">Caja</span></div>`;
+  document.getElementById('dash-alertas').innerHTML = al;
+  /* top */
+  document.getElementById('dash-top').innerHTML = dashData.top.map(([n,u,v])=>
+    `<div class="fila"><span>${n}</span><span>${u} u · <span class="money">${fmt(v)}</span></span></div>`).join('');
+}
+
+/* ============================================================
+   REPORTES — balance por período (gastos reales del módulo Gastos)
+   ============================================================ */
+const REP = {
+  'hoy': { label:'Hoy', tiempo:91000, prods:57300, rec:5200, cmv:26400, dias:null,
+    top:[['Cerveza Quilmes',14,63000],['Fernet + Coca',6,39000],['Promo: 2 Cervezas + Papas',3,33000],['Coca-Cola 500',8,24000]],
+    turnos:[['Hoy noche · Lucas', null]] },
+  'semana': { label:'Últimos 7 días', tiempo:610000, prods:380000, rec:21000, cmv:175000,
+    dias:[['Jue',98],['Vie',182],['Sáb',240],['Dom',155],['Lun',62],['Mar',118],['Mié',148]],
+    top:[['Cerveza Quilmes',86,387000],['Fernet + Coca',41,266500],['Promo: 2 Cervezas + Papas',18,198000],['Coca-Cola 500',52,156000]],
+    turnos:[['09/06 noche · Lucas',0],['09/06 tarde · Sofía',-1200],['08/06 noche · Marcos',300],['07/06 noche · Lucas',0]] },
+  '2026-06': { label:'Junio 2026 (al 11/06)', tiempo:1124000, prods:687500, rec:38200, cmv:318400,
+    dias:[['S1',610],['S2',1240]],
+    top:[['Cerveza Quilmes',124,558000],['Fernet + Coca',59,383500],['Promo: 2 Cervezas + Papas',25,275000],['Papas fritas',71,248500]],
+    turnos:[['09/06 noche · Lucas',0],['09/06 tarde · Sofía',-1200],['08/06 noche · Marcos',300],['06/06 tarde · Sofía',-800]] },
+  '2026-05': { label:'Mayo 2026', tiempo:2480000, prods:1530000, rec:84000, cmv:705000,
+    dias:[['S1',880],['S2',1020],['S3',940],['S4',1254]],
+    top:[['Cerveza Quilmes',290,1305000],['Fernet + Coca',132,858000],['Papas fritas',160,560000],['Coca-Cola 500',145,435000]],
+    turnos:[['31/05 noche · Marcos',500],['30/05 noche · Sofía',0],['29/05 noche · Lucas',-2300]] },
+};
+let periodoRep = '2026-06';
+
+function gastosDePeriodo(p){
+  const hoyISO = new Date().toISOString().slice(0,10);
+  if (p === 'hoy') return gastos.filter(g=>g.f === hoyISO).reduce((a,g)=>a+g.monto,0);
+  if (p === 'semana'){
+    const desde = new Date(Date.now() - 7*86400000).toISOString().slice(0,10);
+    return gastos.filter(g=>g.f >= desde).reduce((a,g)=>a+g.monto,0);
+  }
+  return gastos.filter(g=>g.f.startsWith(p)).reduce((a,g)=>a+g.monto,0);
+}
+function setPeriodoRep(el){ selChip(el); periodoRep = el.dataset.p; renderRep(); }
+
+function renderRep(){
+  const bal = document.getElementById('rep-balance'); if (!bal) return;
+  const r = REP[periodoRep];
+  const gastosPer = gastosDePeriodo(periodoRep);
+  const bruta = r.tiempo + r.prods + r.rec - r.cmv;
+  const neta = bruta - gastosPer;
+  document.getElementById('rep-balance-titulo').textContent = 'Balance — ' + r.label;
+  bal.innerHTML = `
+    <div class="fila"><span>Ingresos por tiempo de mesa</span><span class="money">${fmt(r.tiempo)}</span></div>
+    <div class="fila"><span>Ventas de productos</span><span class="money">${fmt(r.prods)}</span></div>
+    <div class="fila"><span>Recargos cobrados</span><span class="money">${fmt(r.rec)}</span></div>
+    <div class="fila"><span>Costo mercadería vendida (CMV)</span><span class="neg">− ${fmt(r.cmv)}</span></div>
+    <div class="fila"><span><b>Ganancia bruta</b></span><span class="money"><b>${fmt(bruta)}</b></span></div>
+    <div class="fila"><span>Gastos del período <span style="font-size:11px;color:var(--on-surface-variant)">(de la pantalla Gastos)</span></span><span class="neg">− ${fmt(gastosPer)}</span></div>
+    <div class="fila"><span><b>GANANCIA NETA</b></span><span class="total" style="${neta<0?'color:var(--error)':''}">${fmt(neta)}</span></div>`;
+  /* ventas por día / semana */
+  const dc = document.getElementById('rep-dias-card');
+  if (r.dias){
+    dc.style.display = '';
+    document.getElementById('rep-dias-titulo').textContent = (r.dias[0][0].startsWith('S') ? 'Ventas por semana' : 'Ventas por día') + ' (miles de $)';
+    const maxD = Math.max(...r.dias.map(x=>x[1]));
+    document.getElementById('rep-dias').innerHTML = r.dias.map(([d,v])=>
+      `<div class="hcol" title="${d}: ${fmt(v*1000)}"><div class="seg-t" style="height:${v/maxD*100}%;border-radius:4px 4px 3px 3px"></div></div>`).join('');
+    document.getElementById('rep-dias-lbl').innerHTML = r.dias.map(([d])=>`<span>${d}</span>`).join('');
+  } else dc.style.display = 'none';
+  /* top productos */
+  document.getElementById('rep-top').innerHTML = r.top.map(([n,u,v])=>
+    `<div class="fila"><span>${n}</span><span>${u} u · <span class="money">${fmt(v)}</span></span></div>`).join('');
+  /* turnos */
+  document.getElementById('rep-turnos').innerHTML = r.turnos.map(([t,d])=>{
+    const badge = d === null ? '<span class="badge ok">en curso</span>'
+      : d === 0 ? '<span class="badge ok">$0</span>'
+      : d > 0 ? `<span class="badge warn">+ ${fmt(d)}</span>`
+      : `<span class="badge err">− ${fmt(-d)}</span>`;
+    return `<div class="fila"><span>${t}</span>${badge}</div>`;
+  }).join('');
+  /* stock en vivo */
+  const inv = productos.reduce((a,p)=>a + (p.s||0)*(p.cost||0), 0);
+  const bajo = productos.filter(bajoMin).length;
+  document.getElementById('rep-stock').innerHTML = `
+    <div class="fila"><span>Inventario a costo</span><span class="money">${fmt(inv)}</span></div>
+    <div class="fila"><span>Productos bajo mínimo</span><span class="badge ${bajo?'warn':'ok'}">${bajo}</span></div>`;
+}
+
+function exportarRep(){
+  const r = REP[periodoRep];
+  const gastosPer = gastosDePeriodo(periodoRep);
+  const bruta = r.tiempo + r.prods + r.rec - r.cmv;
+  const filas = [
+    ['REPORTE', r.label], [],
+    ['BALANCE'],
+    ['Ingresos por tiempo de mesa', r.tiempo],
+    ['Ventas de productos', r.prods],
+    ['Recargos cobrados', r.rec],
+    ['CMV', -r.cmv],
+    ['Ganancia bruta', bruta],
+    ['Gastos del período', -gastosPer],
+    ['GANANCIA NETA', bruta - gastosPer], [],
+    ['TOP PRODUCTOS','Unidades','Importe'],
+    ...r.top.map(([n,u,v])=>[n,u,v]), [],
+    ['GASTOS DEL PERÍODO','Fecha','Categoría','Medio','Monto'],
+    ...gastos.filter(g=> periodoRep==='hoy' ? g.f===new Date().toISOString().slice(0,10) : periodoRep==='semana' ? g.f >= new Date(Date.now()-7*86400000).toISOString().slice(0,10) : g.f.startsWith(periodoRep))
+      .map(g=>[g.det, fmtFecha(g.f), g.cat, g.medio, -g.monto]),
+  ];
+  const csv = '﻿' + filas.map(f=>f.join(';')).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download = 'reporte-' + periodoRep + '.csv';
+  a.click();
+  snack('⬇️ Excel del período "' + r.label + '" descargado');
+}
+
+/* ============================================================
+   CONFIGURACIÓN — tarifa, redondeo y recargos vivos; usuarios
+   ============================================================ */
+function renderConf(){
+  const t = document.getElementById('conf-tarifa'); if (!t) return;
+  t.value = TARIFA_HORA;
+  document.getElementById('conf-redondeo').value = String(REDONDEO);
+  document.getElementById('conf-recargos').innerHTML = MEDIOS.map(m=>
+    `<div class="fila"><span>${m}</span><span><input type="number" data-medio="${m}" value="${RECARGOS[m]}" style="width:64px;background:var(--surface-container);border:1px solid var(--outline);border-radius:6px;padding:4px 8px;color:var(--on-surface)"> %</span></div>`).join('');
+  document.getElementById('conf-usuarios').innerHTML = usuarios.map((u,i)=>
+    `<div class="fila"><span>${u.n}</span><span style="display:flex;gap:8px;align-items:center">
+      <span class="badge ${u.rol==='Admin'?'ok':'warn'}">${u.rol}</span>
+      ${u.rol==='Admin' ? '' : `<button class="step" title="Eliminar" onclick="quitarUsuario(${i})">✕</button>`}
+    </span></div>`).join('');
+  poblarEmpleados();
+}
+function poblarEmpleados(){
+  const sel = document.getElementById('at-emp');
+  if (sel) sel.innerHTML = usuarios.filter(u=>u.rol!=='Admin').map(u=>`<option>${u.n}</option>`).join('');
+}
+function etiquetaRecargos(){
+  const el = document.getElementById('recargo-label'); if (!el) return;
+  const activos = MEDIOS.filter(m=>RECARGOS[m]>0).map(m=>m+' +'+RECARGOS[m]+'%');
+  el.textContent = activos.length ? '(recargo: '+activos.join(' · ')+')' : '(sin recargos)';
+}
+function guardarConfGeneral(){
+  const nueva = +document.getElementById('conf-tarifa').value || TARIFA_HORA;
+  TARIFA_HORA = nueva; TARIFA_MIN = nueva/60;
+  REDONDEO = +document.getElementById('conf-redondeo').value;
+  const lbl = document.getElementById('tarifa-lbl'); if (lbl) lbl.textContent = fmt(TARIFA_HORA);
+  renderAll();
+  snack('⚙️ Tarifa '+fmt(TARIFA_HORA)+'/h ('+fmt(TARIFA_MIN)+'/min) · redondeo '+(REDONDEO?'a $'+REDONDEO:'exacto')+' — aplicado a todas las mesas');
+}
+function guardarRecargos(){
+  document.querySelectorAll('#conf-recargos input[data-medio]').forEach(inp=>{ RECARGOS[inp.dataset.medio] = +inp.value || 0; });
+  etiquetaRecargos();
+  snack('⚙️ Recargos actualizados — se aplican en el próximo cobro');
+}
+function abrirUsuario(){
+  document.getElementById('us-nombre').value = '';
+  document.getElementById('us-pin').value = '';
+  document.getElementById('us-rol').value = 'Mozo';
+  abrir('d-usuario');
+  setTimeout(()=>document.getElementById('us-nombre').focus(), 80);
+}
+function guardarUsuario(){
+  const n = document.getElementById('us-nombre').value.trim();
+  const pin = document.getElementById('us-pin').value.trim();
+  if (!n){ snack('Ingresá el nombre'); return; }
+  if (!/^\d{4}$/.test(pin)){ snack('El PIN debe tener 4 dígitos'); return; }
+  usuarios.push({ n, rol: document.getElementById('us-rol').value });
+  cerrar('d-usuario'); renderConf();
+  snack('✅ Usuario "'+n+'" creado — ya puede abrir turnos');
+}
+function quitarUsuario(i){
+  const u = usuarios[i];
+  if (turno.abierto && turno.empleado === u.n){ snack('No se puede eliminar: '+u.n+' tiene el turno abierto'); return; }
+  if (!confirm('¿Eliminar al usuario "'+u.n+'"?')) return;
+  usuarios.splice(i,1); renderConf();
+  snack('🗑️ Usuario "'+u.n+'" eliminado');
+}
+function cambiarPIN(){
+  const nuevo = prompt('Nuevo PIN de administrador (4 dígitos):');
+  if (nuevo === null) return;
+  if (!/^\d{4}$/.test(nuevo)){ snack('El PIN debe tener 4 dígitos'); return; }
+  pinAdmin = nuevo;
+  snack('🔑 PIN de administrador actualizado');
+}
+
+/* ============================================================
+   NAVEGACIÓN / ROL / TEMA / UTILS
+   ============================================================ */
+let rol = 'admin', pantalla = 'mesas';
+const PERMISOS = {
+  mozo:  ['mesas','turno','hist'],
+  caja:  ['mesas','cajero','comandas','turno','hist','prod','gastos'],
+  admin: ['mesas','cajero','comandas','turno','hist','prod','gastos','dash','rep','conf'],
+};
+const fabPorPantalla = { mesas:'🛒 Venta rápida', turno:null, cajero:null, comandas:null, hist:null, dash:null, prod:'＋ Registrar compra', gastos:'＋ Registrar gasto', rep:null, conf:null };
+function go(s){
+  pantalla = s;
+  document.querySelectorAll('section.screen').forEach(x=>x.classList.remove('sel'));
+  document.getElementById('s-'+s).classList.add('sel');
+  document.querySelectorAll('.rail .item').forEach(x=>x.classList.toggle('sel', x.dataset.s===s));
+  const f = document.getElementById('fab');
+  const ft = (s==='mesas' && rol==='mozo') ? null : fabPorPantalla[s];   // el mozo no cobra: sin venta rápida
+  if (ft){ f.textContent = ft; f.style.display='block'; } else f.style.display='none';
+  if (s === 'cajero') renderCajero();
+  if (s === 'comandas') renderComandas();
+  if (s === 'hist') renderHistorial();
+  if (s === 'turno') renderTurno();
+  if (s === 'dash') renderDash();
+  if (s === 'gastos') renderGastos();
+  if (s === 'rep') renderRep();
+  if (s === 'conf') renderConf();
+}
+function fabAction(){
+  if (pantalla==='mesas') abrirCuenta('venta', 0);
+  if (pantalla==='prod') abrirCompra();
+  if (pantalla==='gastos') abrirGasto(-1);
+}
+function setRol(r){
+  rol = r;
+  ['mozo','caja','admin'].forEach(x=>{ const b=document.getElementById('rol-'+x); if (b) b.classList.toggle('sel', x===r); });
+  document.querySelectorAll('.rail .item').forEach(b=> b.style.display = PERMISOS[r].includes(b.dataset.s) ? '' : 'none');
+  document.querySelectorAll('.admin-only').forEach(x=> x.style.display = r==='admin' ? '' : 'none');
+  go(PERMISOS[r].includes(pantalla) ? pantalla : 'mesas');
+  renderAll();   // refresca botones por rol (mostrador, acciones)
+  snack(r==='admin' ? '👑 Vista administrador: acceso total'
+      : r==='caja' ? '💰 Vista cajero: cobra, opera comandas, productos y gastos'
+      : '🤵 Vista mozo: mesas, comandas y pre-cierre — los cobros los hace caja');
+}
+function toggleTheme(){ document.documentElement.dataset.theme = document.documentElement.dataset.theme==='dark' ? '' : 'dark'; }
+function abrir(id){ document.getElementById(id).classList.add('open'); }
+function cerrar(id){ document.getElementById(id).classList.remove('open'); }
+function bg(e,id){ if (e.target===e.currentTarget) cerrar(id); }
+function selChip(el){ [...el.parentElement.children].forEach(c=>c.classList.remove('sel')); el.classList.add('sel'); }
+function snack(msg){ const t=document.getElementById('snackbar'); t.textContent=msg; t.style.display='block'; clearTimeout(t._h); t._h=setTimeout(()=>t.style.display='none',3200); }
+function calcDif(){
+  const dif = (+document.getElementById('declarado').value || 0) - efectivoEsperado();
+  const el = document.getElementById('dif');
+  if (dif===0){ el.className='badge ok'; el.textContent='$0 — caja perfecta'; }
+  else if (dif>0){ el.className='badge warn'; el.textContent='+'+fmt(dif)+' sobrante'; }
+  else { el.className='badge err'; el.textContent='−'+fmt(-dif)+' FALTANTE'; }
+}
+function exportarExcel(){
+  const filas = [
+    ['Fecha','Tipo','Detalle','Empleado','Medio','Monto'],
+    ['10/06/2026','Mesa','Pool 3 - Roberto - 95 min','Lucas','Efectivo','19000'],
+    ['10/06/2026','Venta','2x Cerveza + Papas','Lucas','MercadoPago','12500'],
+    ['10/06/2026','Compra','Agua mineral x24','Diego','Transferencia','-20400'],
+    ['09/06/2026','Gasto','Monotributo','Diego','Transferencia','-130000'],
+    ['','','','','TOTAL PERIODO','618300']
+  ];
+  const csv = '﻿' + filas.map(f=>f.join(';')).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download = 'reporte-salon-pool.csv';
+  a.click();
+  snack('⬇️ Excel descargado (ejemplo)');
+}
+
+/* ============================================================
+   IDIOMA — Español ⇄ 中文 (chino simplificado)
+   Motor de frases: recorre los textos de la página y los traduce.
+   Cubre también todo lo generado dinámicamente (MutationObserver).
+   ============================================================ */
+let lang = 'es', traduciendo = false;
+const DICC = [
+  ['BOCETO MATERIAL DESIGN 3 · DATOS DE EJEMPLO · FUNCIONAL EN MEMORIA (SE PIERDE AL RECARGAR)','示意原型 · 示例数据 · 内存运行（刷新后重置）'],
+  ['Salón de Pool — Gestión','台球厅管理系统'],
+  ['Vinculada: siguen usando la mesa para sentarse y comparten una única cuenta. El cronómetro corre en la de pool.','关联：客人继续使用散座桌，两桌共用一张账单，计时在台球桌进行。'],
+  ['Turno de','当班：'],['tocá cualquier mesa para operar su cuenta','点击任意桌台操作其账单'],
+  ['— solo consumos, sin cargo por tiempo','— 仅消费，不按时间收费'],
+  ['— cuentas abiertas por nombre, se mantienen hasta cobrar','— 按姓名开单，结账前保持打开'],
+  ['Cuenta por nombre · queda abierta hasta que se cobre','按姓名开单 · 收款前保持打开'],
+  ['Solo consumos · sin cargo por tiempo','仅消费 · 不按时间收费'],
+  ['solo consumos','仅消费'],['Sin consumos todavía — tocá un producto arriba','暂无消费——点击上方商品添加'],
+  ['Sin resultados — probá otro nombre','无结果——请尝试其他名称'],
+  ['Se muestra en pantalla · se puede guardar como PDF','屏幕显示 · 可保存为 PDF'],
+  ['Suma stock, actualiza el costo y registra el egreso de dinero','增加库存、更新成本并记录支出'],
+  ['El costo se actualiza con cada compra · la ganancia usa el último costo','成本随每次进货更新 · 利润按最新成本计算'],
+  ['Hoy en vivo · día contable desde las 06:00','今日实时 · 营业日从 06:00 起'],
+  ['Junio 2026 · impactan en la ganancia neta','2026年6月 · 影响净利润'],
+  ['Todo exportable a Excel como respaldo','全部可导出 Excel 备份'],
+  ['Solo administrador (protegido con PIN en la versión final)','仅管理员（正式版以 PIN 保护）'],
+  ['Contá el efectivo de la caja y declaralo','清点现金并申报'],
+  ['Cuenta abierta','开单时间'],['se mantiene hasta cobrar','收款前保持打开'],
+  ['Mesas de pool','台球桌'],['Mesas de salón','散座桌'],['mesa de salón','散座桌'],
+  ['¿Qué hacemos con la mesa de salón?','散座桌如何处理？'],
+  ['Tiempo solicitado (alerta opcional)','预约时长（可选提醒）'],
+  ['Propina (opcional, no integra recaudación)','小费（可选，不计入营业额）'],
+  ['recargo: crédito +8% · MP +5%','附加费：信用卡 +8% · MP +5%'],
+  ['Cerrar turno y arquear caja','交班并盘点现金'],['Cierre de turno','交班'],['Cerrar turno','交班'],
+  ['Pasar a mesa de pool','转至台球桌'],['Mover a otra mesa de pool','移至其他台球桌'],
+  ['Mesa de pool libre','空闲台球桌'],['el cronómetro sigue corriendo','计时继续'],
+  ['Mantener vinculada','保持关联'],['Liberarla','释放'],
+  ['Nueva cuenta — Mostrador','新建账单 — 吧台'],['Nueva cuenta','新建账单'],
+  ['cuenta única con Pool','共用账单 · Pool'],['Tocar para abrir','点击开台'],
+  ['cobro por minuto','按分钟计费'],['Nombre del cliente','顾客姓名'],
+  ['Abrir Salón S','开桌 S'],['Abrir Pool','开台 Pool'],['Abrir mesa','开台'],
+  ['Más vendidos','热销商品'],['Resultados','搜索结果'],['Total parcial','小计'],
+  ['TOTAL A PAGAR','应付总额'],['Total compra','进货总额'],['TOTAL PERIODO','本期总计'],
+  ['Confirmar cobro','确认收款'],['Cerrar y cobrar','关台结账'],['Cobrar y cerrar','结账关单'],
+  ['Pasar a pool…','转至台球桌…'],['Guardar y volver','保存并返回'],['Mover de mesa','换桌'],
+  ['Pago dividido…','分单支付…'],['Medio de pago','支付方式'],['Sin desc.','无折扣'],
+  ['Descuento','折扣'],['Recargo','附加费'],['Redondeo a $100','取整到 $100'],['Redondeo','取整'],
+  ['Ticket no fiscal','非财务凭证'],['Comprobante no fiscal','非财务凭证'],
+  ['Imprimir / PDF','打印 / PDF'],['¡Gracias por su visita!','感谢光临！'],['Atendió:','服务员：'],
+  ['Sesiones de mesa','开台数'],['Ventas rápidas','快速销售'],['Venta rápida','快速销售'],
+  ['Cobrado en el turno','本班次收款'],['Cobrado por medio de pago','按支付方式统计'],
+  ['Recaudación por medio','按支付方式'],['Recaudado hoy','今日营业额'],
+  ['Mesas activas','使用中桌台'],['Horas de mesa vendidas','售出台时'],
+  ['Ventas de productos','商品销售额'],['vs. miércoles pasado','对比上周三'],
+  ['Más vendidos hoy','今日热销'],['Productos y stock','商品与库存'],
+  ['Reportes y balance','报表与结算'],['Registrar compra','登记进货'],['Guardar compra','保存进货'],
+  ['Nuevo producto','新增商品'],['Registrar gasto','登记支出'],
+  ['Impacta en el balance del período','计入本期结算'],
+  ['Gastos del mes','本月支出'],['Mayor categoría','最大类别'],['Gastos del período','本期支出'],
+  ['Ingresos por tiempo de mesa','台时收入'],['Recargos cobrados','附加费收入'],
+  ['Costo mercadería vendida (CMV)','已售商品成本'],['Ganancia bruta','毛利'],['GANANCIA NETA','净利润'],
+  ['Turnos — diferencias de caja','班次 — 现金差异'],['Stock valorizado','库存估值'],
+  ['Inventario a costo','按成本计库存'],['Productos bajo mínimo','低于下限商品'],
+  ['Bajo mínimo','低于下限'],['Crítico (mín.','紧缺（下限 '],['Preparado','现调'],['preparado','现调'],
+  ['Exportar historial completo','导出完整历史'],['Exportar Excel','导出 Excel'],
+  ['Tarifas y cobro','费率与收款'],['Valor de la hora de mesa ($)','台费每小时 ($)'],
+  ['Corte del día contable','营业日切换时间'],['Recargos por medio de pago','各支付方式附加费'],
+  ['Tarjeta de débito','借记卡'],['Tarjeta de crédito','信用卡'],
+  ['Datos y respaldo','数据与备份'],['En pantalla / PDF (térmica a futuro)','屏幕 / PDF（热敏打印机待加）'],
+  ['Efectivo inicial','期初现金'],['efectivo inicial','期初现金'],
+  ['+ Cobros en efectivo','+ 现金收款'],['− Pagos en efectivo (gastos/compras)','− 现金支出（支出/进货）'],
+  ['Efectivo esperado','应有现金'],['Efectivo contado ($)','清点现金 ($)'],
+  ['caja perfecta','账实相符'],['sobrante','盈余'],['FALTANTE','短缺'],['Diferencia','差额'],
+  ['Costo unitario ($)','单位成本 ($)'],['Proveedor (opcional)','供应商（可选）'],
+  ['Precio venta','售价'],['Categoría','类别'],['Cantidad','数量'],['Producto','商品'],
+  ['Transferencia','转账'],['Transf.','转账'],['Efectivo','现金'],['Débito','借记卡'],['Crédito','信用卡'],
+  ['Mostrador','吧台'],['Salón S','散座 S'],['Mi turno','我的班次'],['Dashboard','仪表盘'],
+  ['Productos','商品'],['Gastos','支出'],['Reportes','报表'],['Config','设置'],['Configuración','设置'],
+  ['Salón','大厅'],['Cuenta','账单'],['SIN STOCK','无库存'],['stock','库存'],['Stock','库存'],
+  ['Alquiler','房租'],['Servicios','水电网'],['Sueldos','工资'],['Mantenimiento','维护'],['Impuestos','税费'],
+  ['Bebidas','饮品'],['Insumos','用品'],['Otros','其他'],['Todos','全部'],
+  ['OCUPADA','占用'],['LIBRE','空闲'],['Libre','不限'],['VINCULADA','已关联'],
+  ['sin límite','不限时'],['pidió','预订 '],['desde','自'],['ítems','项'],['noche','晚班'],['tarde','午班'],
+  ['Empleado','员工'],['Admin','管理员'],['Usuarios','用户'],['Agregar','添加'],
+  ['Confirmar','确认'],['Cancelar','取消'],['Vaciar','清空'],['Volver','返回'],['Cerrar','关闭'],
+  ['Guardar','保存'],['Cobro —','结账 —'],['Cobrar','收款'],['Detalle','明细'],['Fecha','日期'],
+  ['Medio','方式'],['Monto','金额'],['Estado','状态'],['Costo','成本'],['Tiempo','时间'],
+  ['TOTAL','总计'],['Total','总计'],['Propinas','小费'],['Propina','小费'],['Tarifa','费率'],
+  ['abierto hoy','今日开始'],['abierto','开始'],['Hoy','今天'],['Semana','本周'],['Rango…','自定义…'],
+  ['Buscar producto…','搜索商品…'],['Ej: Carlos','例如：小王'],
+  ['Movimientos del turno','班次流水'],['Sin movimientos todavía','暂无流水'],['Sin cobros todavía','暂无收款'],
+  ['Retiro / ingreso de caja','现金存取'],['Retiro de efectivo','取出现金'],['Ingreso de efectivo','存入现金'],
+  ['Movimiento de efectivo del turno (afecta el arqueo)','本班次现金变动（影响盘点）'],
+  ['Caja — retiros e ingresos','现金 — 存取记录'],['Efectivo esperado en caja','柜内应有现金'],
+  ['+ Ingresos de caja','+ 存入现金'],['− Retiros de caja','− 取出现金'],
+  ['No hay turno abierto','当前无班次'],['Turno cerrado','已交班'],
+  ['Para operar el salón hay que abrir un turno nuevo','需开启新班次方可操作'],
+  ['Abrir turno','开班'],['Empleado del turno','当班员工'],['Efectivo inicial ($)','期初现金 ($)'],
+  ['Comenzar turno','开始班次'],['En producción cada empleado entra con su PIN','正式版中员工以 PIN 登录'],
+  ['Ej: pago proveedor de hielo','例如：支付冰块供应商'],['pago proveedor de hielo','支付冰块供应商'],
+  ['Motivo','事由'],['Registrar','登记'],['propina','小费'],
+  ['COBRADO POR MEDIO DE PAGO','按支付方式收款'],['ARQUEO DE EFECTIVO','现金盘点'],
+  ['Total cobrado','收款总额'],['Propinas (aparte)','小费（另计）'],
+  ['Sin cobros en el turno','本班次暂无收款'],['cobros','笔'],['cobro','笔'],
+  ['tocá un producto para editarlo','点击商品进行编辑'],
+  ['Los empleados solo ven nombre y precio; costo y márgenes son del admin','员工仅见名称与售价；成本与利润仅管理员可见'],
+  ['Stock actual (vacío = preparado)','当前库存（留空 = 现调）'],['Stock mínimo (alerta)','库存下限（警报）'],
+  ['Precio de venta ($)','售价 ($)'],['Costo ($)','成本 ($)'],['Nombre','名称'],
+  ['Editar producto','编辑商品'],['Guardar producto','保存商品'],['Eliminar','删除'],
+  ['Sin productos para este filtro','该筛选无商品'],['Margen','利润率'],['Mín.','下限'],
+  ['Crítico','紧缺'],['Bajo mínimo','低于下限'],['Inventario a costo','按成本计库存'],
+  ['Componentes del combo (al vender descuenta el stock de cada uno)','套餐组成（售出时扣减各组成库存）'],
+  ['Costo del combo (componentes)','套餐成本（组成合计）'],['Margen con este precio','此价格的利润率'],
+  ['Se pueden armar hoy','今日可组配数量'],['Sin stock para armar','库存不足，无法组配'],
+  ['Agregar componente','添加组成'],['Promos','套餐'],['Promo','套餐'],
+  ['Sin stock','无库存'],['combo','套餐'],['disp.','可售'],
+  ['comparado contra el mismo día de la semana pasada','与上周同日对比'],
+  ['vs. mismo día sem. pasada','对比上周同日'],['Ventas por hora','分时销售'],
+  ['De dónde viene la plata','收入构成'],['Para mirar ahora','需要关注'],
+  ['Ticket promedio','客单价'],['Ocupación ahora','当前使用率'],
+  ['Tiempo de mesa','台时收入'],['aparte de la recaudación','不计入营业额'],
+  ['tiempo cumplido','已超时'],['quedan','剩余'],['mín.','下限'],
+  ['Caja de ayer (Sofía): faltante $1.200','昨日现金（Sofía）：短缺 $1.200'],
+  ['pool','台球'],['salón','散座'],['mesas','台桌'],['productos','商品'],
+  ['Impactan en la ganancia neta · tocá un gasto para editarlo','影响净利润 · 点击支出进行编辑'],
+  ['Fijo: se repite todos los meses (alquiler, internet…). En producción el sistema los precarga solos cada mes.','固定支出：每月重复（房租、网络等）。正式版每月自动预载。'],
+  ['Fijos del mes','本月固定支出'],['del total','占总额'],['vs. mes anterior','对比上月'],
+  ['gastando más','支出增加'],['gastando menos','支出减少'],
+  ['Gastos / ventas','支出 / 营业额'],['del mes seleccionado','所选月份'],
+  ['Por categoría','按类别'],['Sin gastos este mes','本月暂无支出'],
+  ['Sin gastos para este filtro','该筛选无支出'],['Total del filtro','筛选合计'],
+  ['Fijo mensual','每月固定'],['Variable','变动'],['Fijos','固定'],
+  ['Tipo de gasto','支出类型'],['Editar gasto','编辑支出'],
+  ['Junio 2026','2026年6月'],['Mayo 2026','2026年5月'],['Todas','全部'],
+  ['Alquiler junio','6月房租'],['Alquiler mayo','5月房租'],['Sueldos mayo','5月工资'],
+  ['Reposición tacos y tizas','补充球杆与巧粉'],['Adelanto Sofía','Sofía 预支'],
+  ['Cambio de paño Mesa 4','4号桌换台呢'],['Luz — Edesur','电费 — Edesur'],['Internet','网络'],['Monotributo','单一税'],
+  ['El balance toma los gastos reales de la pantalla Gastos · todo exportable a Excel','结算采用“支出”页面的真实数据 · 全部可导出 Excel'],
+  ['Gastos del período (de la pantalla Gastos)','本期支出（来自支出页面）'],
+  ['(de la pantalla Gastos)','（来自支出页面）'],
+  ['Top productos del período','本期热销商品'],['Stock valorizado (en vivo)','库存估值(实时)'],
+  ['Ventas por semana (miles de $)','按周销售（千元）'],['Ventas por día (miles de $)','按日销售（千元）'],
+  ['Últimos 7 días','近 7 天'],['Junio 2026 (al 11/06)','2026年6月（截至 11/06）'],
+  ['Balance —','结算 —'],['en curso','进行中'],
+  ['Solo administrador (en producción protegida con PIN) · los cambios afectan toda la app al instante','仅管理员（正式版以 PIN 保护）· 更改即时生效于全系统'],
+  ['Redondeo del total a cobrar','应收总额取整'],['Aplicar cambios','应用更改'],
+  ['Recargos por medio de pago (%)','各支付方式附加费 (%)'],['Aplicar recargos','应用附加费'],
+  ['Cambiar PIN de administrador','更改管理员 PIN'],['Cambiar…','更改…'],
+  ['El PIN es la clave con la que entra al sistema','PIN 为登录系统的密码'],
+  ['Nuevo usuario','新建用户'],['Guardar usuario','保存用户'],['PIN (4 dígitos)','PIN（4 位数字）'],
+  ['Rol','角色'],['(sin recargos)','（无附加费）'],['(recargo:','（附加费：'],
+  /* comandas + historial + personas */
+  ['Pedidos enviados a preparación · las más viejas primero · tocá ✓ cuando esté lista y entregada','已送出制作的订单 · 最早的在前 · 备好并送达后点 ✓'],
+  ['Todos los pedidos y cobros del salón en orden cronológico','大厅所有订单与收款的时间记录'],
+  ['No hay comandas pendientes — todo entregado','没有待处理订单——全部已送达'],
+  ['Comentario para la preparación (opcional)','给制作的备注（可选）'],
+  ['Ej: la gaseosa al natural, sin hielo','例如：饮料常温，不加冰'],
+  ['No hay productos nuevos para comandar','没有新商品可下单'],
+  ['Ya está comandado — no se puede quitar de la cuenta','已下单——无法从账单移除'],
+  ['Indicá cuántas personas van a estar en la mesa','请选择用餐人数'],
+  ['¿Cuántas personas? *','几位客人？*'],
+  ['Nombre del cliente (opcional)','顾客姓名（可选）'],
+  ['Buscar por mesa o cliente…','按桌台或顾客搜索…'],
+  ['Sin movimientos para este filtro','该筛选无记录'],
+  ['Se envía a preparación','送至制作'],
+  ['enviada a preparación','已送出制作'],
+  ['lista y entregada','已备好并送达'],
+  ['Comandar pedido','下单'],['Enviar comanda','送出订单'],['Comandar','下单'],
+  ['Comandas','订单'],['Comanda','订单'],['Historial','历史'],
+  ['sin comandar','未下单'],['en preparación','制作中'],['entregado','已送达'],
+  ['Entregada','已送达'],['Pendiente','待处理'],['pendiente','待处理'],
+  ['✓ Lista','✓ 备好'],['Cobros','收款'],['Todo','全部'],
+  ['personas','人'],['Sin hielo, vaso aparte','不加冰，杯子另上'],
+  /* roles, cajero y pre-cierre */
+  ['Pre-cierres enviados por los mozos y cuentas abiertas · acá se cobra y se emite el ticket','服务员送来的预结单与未结账单 · 在此收款并打印小票'],
+  ['— las más viejas primero, hay gente esperando pagar','— 最早的在前，客人正在等待结账'],
+  ['— tocá una para operarla o cobrarla directo','— 点击可操作或直接结账'],
+  ['Hay productos sin comandar — comandalos o quitalos antes de pedir la cuenta','有未下单的商品——请先下单或移除后再请求结账'],
+  ['La cuenta está en caja — reabrila para modificarla','账单已送收银台——需重新打开才能修改'],
+  ['El mozo no puede editar comandas enviadas — pedilo a caja','服务员不能修改已送出的订单——请联系收银台'],
+  ['Ya está comandado — solo Caja/Admin pueden editarlo desde Comandas','已下单——仅收银/管理员可在订单页修改'],
+  ['los cambios actualizan la cuenta, el stock y el cobro','更改将同步账单、库存与结账'],
+  ['Motivo del cambio (obligatorio, queda en el historial)','更改原因（必填，记入历史）'],
+  ['Indicá el motivo del cambio — queda en el historial','请填写更改原因——将记入历史'],
+  ['Ej: sin stock de Coca, se reemplaza por agua','例如：可乐无货，换成矿泉水'],
+  ['Sin ítems — al guardar, la comanda se cancela','无商品——保存后订单将取消'],
+  ['Agregar / reemplazar por','添加 / 替换为'],
+  ['tiempo congelado en el pre-cierre','预结时已冻结计时'],
+  ['cuenta en caja · tiempo congelado','账单在收银台 · 计时已冻结'],
+  ['EN CAJA — cuenta cerrada para agregar','已送收银台——不可再添加'],
+  ['enviado a caja','已送收银台'],['Enviar a caja','送收银台'],['A caja','送收银台'],
+  ['Esperando cobro','等待结账'],['Nadie esperando pagar','暂无客人等待结账'],
+  ['Cuentas abiertas','未结账单'],['Cuenta reabierta','账单已重新打开'],
+  ['Reabrir cuenta','重新打开账单'],['Reabrir','重新打开'],['Reabierta','已重开'],
+  ['Pre-cierre','预结'],['PAGANDO','结账中'],['pre-cierre','预结'],
+  ['Editar comanda','编辑订单'],['Guardar cambios','保存更改'],['Editada','已修改'],['Cancelada','已取消'],
+  ['tiempo congelado','计时已冻结'],['tiempo corriendo','计时进行中'],
+  ['Comandas enviadas','已发订单'],['Ítems comandados','已下单商品数'],
+  ['Pre-cierres enviados','已发预结单'],['Mesas activas ahora','当前使用中桌台'],
+  ['Últimas comandas','最近订单'],['operación de salón — la caja la maneja el cajero','大厅操作——收款由收银员负责'],
+  ['turno abierto','开班于'],['Cajero','收银台'],['Mozo','服务员'],['Caja','收银'],
+  ['Vista administrador: acceso total','管理员视图：完全访问'],
+  ['Vista cajero: cobra, opera comandas, productos y gastos','收银视图：收款、订单、商品与支出'],
+  ['Vista mozo: mesas, comandas y pre-cierre — los cobros los hace caja','服务员视图：桌台、下单与预结——收款由收银台完成'],
+].sort((a,b)=>b[0].length-a[0].length);
+
+function nodosTexto(){
+  const out = [], w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  while (w.nextNode()) out.push(w.currentNode);
+  return out;
+}
+function traducirTodo(){
+  traduciendo = true;
+  nodosTexto().forEach(n=>{
+    const orig = (n.__es !== undefined) ? n.__es : n.nodeValue;
+    if (!orig || !orig.trim()) return;
+    let txt = orig;
+    for (const [a,b] of DICC) if (txt.includes(a)) txt = txt.split(a).join(b);
+    if (txt !== orig && n.__es === undefined) n.__es = orig;
+    if (n.nodeValue !== txt && txt !== orig) n.nodeValue = txt;
+  });
+  document.querySelectorAll('[placeholder]').forEach(el=>{
+    if (el.__es === undefined) el.__es = el.placeholder;
+    let t = el.__es;
+    for (const [a,b] of DICC) if (t.includes(a)) t = t.split(a).join(b);
+    el.placeholder = t;
+  });
+  traduciendo = false;
+}
+function restaurarTodo(){
+  traduciendo = true;
+  nodosTexto().forEach(n=>{ if (n.__es !== undefined){ n.nodeValue = n.__es; delete n.__es; } });
+  document.querySelectorAll('[placeholder]').forEach(el=>{ if (el.__es !== undefined){ el.placeholder = el.__es; delete el.__es; } });
+  traduciendo = false;
+}
+function toggleLang(){
+  lang = (lang === 'es') ? 'zh' : 'es';
+  document.getElementById('lang-btn').textContent = (lang === 'es') ? '中' : 'ES';
+  if (lang === 'zh') traducirTodo(); else restaurarTodo();
+}
+/* todo lo que se re-dibuja (mesas, cuentas, cobros) se traduce solo */
+new MutationObserver(()=>{ if (lang==='zh' && !traduciendo) traducirTodo(); })
+  .observe(document.body, { childList:true, subtree:true, characterData:true });
+
+document.getElementById('fecha').textContent = new Date().toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+renderAll();
+renderTablaProd();
+poblarEmpleados();
+etiquetaRecargos();
+badgeComandas();
+badgeCajero();
+go('mesas');
+</script>
+</body>
+</html>
